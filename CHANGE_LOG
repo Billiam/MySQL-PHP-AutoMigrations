@@ -1,0 +1,12 @@
+------------------------------------------------------------------------------
+VERSION 1.0
+------------------------------------------------------------------------------
+
+First Release:
+	- able to initialize migrations via command line prompts
+	- integrated help system
+	- able to migrate to latest, up to a specific migration, or down to a 
+	  specific migration
+	- able to list all migrations
+	- able to get status
+	- able to add new migrations
