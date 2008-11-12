@@ -25,16 +25,27 @@ abstract class MpmController
 	protected $arguments;
 	
 	/** 
+	 * The current command being issued.
+	 *
+	 * @var string
+	 */
+	protected $command;
+	
+	/** 
 	 * Object constructor.
 	 * 
 	 * @param array $arguments an array of command line arguments (minus the first two elements which should already be shifted off from the MpmControllerFactory)
 	 *
 	 * @return MpmController
 	 */
-	public function __construct($arguments = array())
+	public function __construct($command = 'help', $arguments = array())
 	{
 		$this->arguments = $arguments;
-		$this->checkIfReady();
+		$this->command = $command;
+		if ($command != 'help' && $command != 'init')
+		{
+			$this->checkIfReady();
+		}
 	}
 	
 	/**
