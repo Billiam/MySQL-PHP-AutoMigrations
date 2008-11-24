@@ -1,4 +1,12 @@
 ------------------------------------------------------------------------------
+VERSION 1.1
+------------------------------------------------------------------------------
+
+    - now stores migration information in database table;
+    - supports migration interleaving (insertion of migrations between 
+      migrations which have already been run)
+	
+------------------------------------------------------------------------------
 VERSION 1.0
 ------------------------------------------------------------------------------
 

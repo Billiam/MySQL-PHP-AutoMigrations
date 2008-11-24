@@ -46,6 +46,7 @@ abstract class MpmController
 		{
 			$this->checkIfReady();
 		}
+		MpmListHelper::mergeFilesWithDb();
 	}
 	
 	/**

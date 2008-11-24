@@ -46,11 +46,11 @@ class MpmListController extends MpmController
 		{
 			$page = 1;
 		}
+		$start_idx = ($page - 1) * $per_page;
 		
-		$list = MpmListHelper::getList();
-		$total = count($list);
+		$list = MpmListHelper::getFullList($start_idx);
+		$total = MpmListHelper::getTotalMigrations();
 		$total_pages = ceil($total / $per_page);
-		
 		$clw = MpmCommandLineWriter::getInstance();
 		
 		if ($total == 0)
@@ -59,21 +59,23 @@ class MpmListController extends MpmController
 		}
 		else
 		{
-			$clw->addText("\t#\t\tTimestamp");
-			$clw->addText("\t=========================================");
-			$cur_index = ($page - 1) * $per_page;
-			$last_index = $cur_index + $per_page;
-			if ($last_index > $total)
+		    $clw->addText("WARNING: Migration numbers may not be in order due to interleaving.", 4);
+		    $clw->addText(" ");
+			$clw->addText("#\t\tTimestamp", 6);
+			$clw->addText("=========================================", 4);
+			foreach ($list as $obj)
 			{
-				$last_index = $total;
-			}
-			for ($i = $cur_index; $i < $last_index; $i++)
-			{
-				$obj = $list[$i];
-				$clw->addText("\t" . $i . "\t\t" . $obj->timestamp);
+			    if (strlen($obj->id) > 1)
+			    {
+				    $clw->addText($obj->id . "\t" . $obj->timestamp, 6);
+			    }
+			    else
+			    {
+				    $clw->addText($obj->id . "\t\t" . $obj->timestamp, 6);
+			    }
 			}
 			$clw->addText(" ");
-			$clw->addText("\tPage $page of $total_pages, $total migrations in all.");
+			$clw->addText("Page $page of $total_pages, $total migrations in all.", 4);
 		}
 		
 		$clw->write();

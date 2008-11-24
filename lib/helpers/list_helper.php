@@ -16,15 +16,97 @@
  */
 class MpmListHelper
 {
+
+    /**
+     * Returns the total number of migrations available.
+     *
+     * @return int
+     */
+    static function getTotalMigrations()
+    {
+        try
+        {
+            $sql = "SELECT COUNT(*) AS total FROM `mpm_migrations`";
+            $pdo = MpmDb::getPdo();
+            $stmt = $pdo->query($sql);
+            $obj = $stmt->fetch(PDO::FETCH_OBJ);
+        }
+        catch (Exception $e)
+        {
+            echo "\n\nError: " . $e->getMessage();
+        }
+        return $obj->total;
+    }
+    
+    /**
+     * Returns a full list of all migrations.
+     *
+     * @param int $startIdx the start index number
+     * @param int $total    total number of records to return
+     *
+     * @return arrays
+     */
+    static function getFullList($startIdx = 0, $total = 30)
+    {
+        $list = array();
+        $sql = "SELECT * FROM `mpm_migrations` ORDER BY `timestamp`";
+        if ($total > 0)
+        {
+            $sql .= " LIMIT $startIdx,$total";
+        }
+        $pdo = MpmDb::getPdo();
+        try
+        {
+            $stmt = $pdo->query($sql);
+            while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
+            {
+                $list[] = $obj;
+            }
+        }
+        catch (Exception $e)
+        {
+            echo "\n\nError: " . $e->getMessage() . "\n\n";
+            exit;            
+        }
+        return $list;
+    }
+    
+    /**
+     * Fetches a list of files and adds migrations to the database migrations table.
+     * 
+     * @return void
+     */
+    static function mergeFilesWithDb()
+    {
+        $pdo = MpmDb::getPdo();
+        $pdo->beginTransaction();
+        try
+        {
+            $files = MpmListHelper::getListOfFiles();
+            foreach ($files as $file)
+            {
+                $sql = "INSERT IGNORE INTO `mpm_migrations` ( `timestamp`, `active`, `is_current` ) VALUES ( '{$file->timestamp}', 0, 0 )";
+                $pdo->exec($sql);
+            }
+        }
+        catch (Exception $e)
+        {
+            $pdo->rollback();
+            echo "\n\nError: " . $e->getMessage();
+            echo "\n\n";
+            exit;
+        }
+        $pdo->commit();
+    }
 	
 	/**
-	 * Returns an array of objects which hold data about a migration (timestamp, file, etc.).
+	 * Returns an array of objects which hold data about a migration file (timestamp, file, etc.).
 	 *
 	 * @param string $sort should either be old or new; determines how the migrations are sorted in the array
 	 *
 	 * @return array
 	 */
-	static public function getList($sort = 'old')
+	static public function getListOfFiles($sort = 'old')
 	{
 		$list = array();
 		if ($sort == 'new')
@@ -41,9 +123,7 @@ class MpmListHelper
 			$full_file = MPM_PATH . '/db/' . $file;
 			if ($file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
 			{
-				$time = substr($file, 0, strlen($file) - 4);
-				$t = explode('_', $time);
-				$timestamp = $t[0] . '-' . $t[1] . '-' . $t[2] . 'T' . $t[3] . ':' . $t[4] . ':' . $t[5] . '+00:00';
+                $timestamp = MpmStringHelper::getTimestampFromFilename($file);
 				$obj = (object) array();
 				$obj->timestamp = $timestamp;
 				$obj->filename = $file;
@@ -62,13 +142,54 @@ class MpmListHelper
 	static public function getFiles()
 	{
 		$files = array();
-		$list = MpmListHelper::getList();
+		$list = MpmListHelper::getListOfFiles();
 		foreach ($list as $obj)
 		{
 			$files[] = $obj->filename;
 		}
 		return $files;
 	}
+	
+	/**
+	 * Fetches a list of migrations which have already been run.
+	 *
+	 * @param string $latestTimestamp the current timestamp of the migration run last
+	 * @param string $direction the way we are migrating; should either be up or down
+	 *
+	 * @return array
+	 */
+	static public function getListFromDb($latestTimestamp, $direction = 'up')
+	{
+		$pdo = MpmDb::getPdo();
+		$list = array();
+		try
+		{
+			if ($direction == 'down')
+			{
+				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
+			}
+			else
+			{
+				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
+			}
+			$stmt = $pdo->query($sql);
+			if ($stmt->rowCount() > 0)
+			{
+				while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
+				{
+					$list[] = $obj->timestamp;
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			echo "\n\nERROR -- " . $e->getMessage();
+			echo "\n\n";
+			exit;
+		}
+		return $list;
+	}
+	
 	
 }
 

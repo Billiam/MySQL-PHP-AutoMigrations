@@ -27,6 +27,10 @@ class MpmUpController extends MpmController
 	public function doAction()
 	{
 		$clw = MpmCommandLineWriter::getInstance();
+		$clw->writeHeader();
+		
+		$this->rollBackInterleaves();
+		
 		$pdo = MpmDb::getPdo();
 		
 		if (count($this->arguments) == 0)
@@ -40,50 +44,71 @@ class MpmUpController extends MpmController
 			return $this->displayHelp();
 		}
 
-		$list = MpmListHelper::getList();
-		$total = count($list);
-		$last_possible_num = $total - 1;
-		$current = MpmMigrationHelper::getCurrentMigrationNumber();
-
-		$clw->writeHeader();
-		
-		if ($up_to > $last_possible_num)
+        // what migrations need to be done?
+        $list = MpmMigrationHelper::getListOfMigrations($up_to);
+        
+        // get latest timestamp
+        $latest = MpmMigrationHelper::getCurrentMigrationTimestamp();
+        if ($latest === false)
+        {
+            $latest = 'no migrations run';
+        }
+        
+        // get current migration number
+        $current = MpmMigrationHelper::getCurrentMigrationNumber();
+        
+		if (count($list) == 0)
 		{
-			echo "Unable to migrate up to this migration number.\n";
-			echo "You are already on that migration, past that migration, or it does not exist.\n";
-			$clw->writeFooter();
-			exit;
-		}
-		if ($up_to == $last_possible_num)
-		{
-			echo "Unable to migrate up to this migration number.\n";
-			echo "Use the latest command instead.\n";
-			$clw->writeFooter();
-			exit;
-		}
-		if ($up_to == $current)
-		{
-			echo "Unable to migrate up to this migration number.\n";
-			echo "You are already at this migration.\n";
-			$clw->writeFooter();
-			exit;
+		    echo 'No migrations need to be run.  Latest migration: ' . $latest;
+		    $clw->writeFooter();
+		    exit;
 		}
 		
-		$start = ($current != 0) ? $current + 1 : 0;
-		$total_migrations_run = 0;
-		$new_latest = '';
+		$to = MpmMigrationHelper::getTimestampFromId($up_to);
 		
-		echo "Migrating to " . $list[$up_to]->timestamp . '... ';
+		echo "Migrating to " . $to . '... ';
 		
-		for ($i = $start; $i <= $up_to; $i++)
+		foreach ($list as $id => $obj)
 		{
-			$obj = $list[$i];
-			MpmMigrationHelper::runMigration('up', $obj, $pdo, $new_latest, $total_migrations_run);
+		    MpmMigrationHelper::runMigration($obj);
 		}
 		
-		MpmMigrationHelper::showMigrationResult($latest, $total_migrations_run);
 		$clw->writeFooter();
 	}
+
+    /**
+     * If interleaved migrations are found, this method rolls back to that migration.  Called before the up command runs.
+     *
+     * @return void
+     */
+    private function rollBackInterleaves()
+    {
+        // any new migrations prior to current?
+        $pdo = MpmDb::getPdo();
+		$currentTimestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
+        $sql = "SELECT `id` FROM `mpm_migrations` WHERE `timestamp` < '$currentTimestamp' AND `active` = 0 ORDER BY `timestamp` LIMIT 0,1";
+        try
+        {
+            $stmt = $pdo->query($sql);
+            if ($stmt->rowCount() == 1)
+            {
+                $result = $stmt->fetch(PDO::FETCH_OBJ);
+                $timestamp = MpmMigrationHelper::getTimestampFromId($result->id);
+                echo "Interleaved Migration(s) Found... Rolling Back...";
+				$list = MpmMigrationHelper::getListOfMigrations($result->id, 'down');
+				foreach ($list as $obj)
+				{
+					MpmMigrationHelper::runMigration($obj, 'down');
+				}
+				echo "\n\n";
+            }
+        }
+		catch (Exception $e)
+		{
+			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
+			exit;
+		}
+    }
 
 	/**
 	 * Displays the help page for this controller.

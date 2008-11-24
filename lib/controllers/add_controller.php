@@ -30,7 +30,7 @@ class MpmAddController extends MpmController
 		$this->checkIfReady();
 		
 		// get date stamp for use in generating filename
-		$date_stamp = gmdate('Y_m_d_H_i_s');
+		$date_stamp = date('Y_m_d_H_i_s');
 		$filename = $date_stamp . '.php';
 		$classname = 'Migration_' . $date_stamp;
 		

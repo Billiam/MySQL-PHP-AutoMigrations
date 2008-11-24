@@ -29,37 +29,28 @@ class MpmLatestController extends MpmController
 		// make sure we're init'd
 		$this->checkIfReady();
 		
-		// need a pdo object
-		$pdo = MpmDb::getPdo();
-		
-		// get latest timestamp
-		$latest = MpmMigrationHelper::getCurrentMigrationTimestamp();
-		
-		// get list of migrations
-		$list = MpmListHelper::getList();
-		
-		// get command line writer
-		$clw = MpmCommandLineWriter::getInstance();
-		$clw->writeHeader();
-		
-		// setup PDO transactions
-		$pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, FALSE);
-		
-		echo "Looking for migrations...";
-		
-		// loop through, running the migrations that are after the current migration
-		$new_latest = '';
-		$total_migrations_run = 0;
-		foreach ($list as $obj)
+		try
 		{
-			if ($obj->timestamp > $latest)
+			$pdo = MpmDb::getPdo();
+			$sql = "SELECT `id` FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
+			$stmt = $pdo->query($sql);
+			if ($stmt->rowCount() == 0)
 			{
-				MpmMigrationHelper::runMigration('up', $obj, $pdo, $new_latest, $total_migrations_run);
+				$clw = MpmCommandLineWriter::getInstance();
+				$clw->addText('No migrations exist.');
+				$clw->write();
+				exit;
 			}
+			$result = $stmt->fetch(PDO::FETCH_OBJ);
+			$to_id = $result->id;
+			$obj = new MpmUpController('up', array ( $to_id ));
+			$obj->doAction();
 		}
-		
-		MpmMigrationHelper::showMigrationResult($latest, $total_migrations_run);
-		$clw->writeFooter();
+		catch (Exception $e)
+		{
+			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
+			exit;
+		}
 	}
 	
 	/**

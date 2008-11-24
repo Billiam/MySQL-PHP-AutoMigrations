@@ -37,7 +37,7 @@ class MpmStatusController extends MpmController
 		$num = MpmMigrationHelper::getCurrentMigrationNumber();
 		
 		// get list of migrations
-		$list = MpmListHelper::getList();
+		$list = MpmListHelper::getFullList();
 		
 		// get command line writer
 		$clw = MpmCommandLineWriter::getInstance();
@@ -56,15 +56,13 @@ class MpmStatusController extends MpmController
 		
 		// loop through, running the migrations that are after the current migration
 		$total_migrations_needed = 0;
-		$num = 0;
 		foreach ($list as $obj)
 		{
 			if ($obj->timestamp > $latest)
 			{
-				echo "\n\t$num\t" . $obj->timestamp;
+				echo "\n\t{$obj->id}\t" . $obj->timestamp;
 				$total_migrations_needed++;
 			}
-			$num++;
 		}
 		
 		// if no migrations run, we're finished

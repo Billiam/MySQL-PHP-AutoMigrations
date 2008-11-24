@@ -18,6 +18,33 @@ class MpmStringHelper
 {
 
     /**
+     * Returns a timestamp when given a migration filename.
+     *
+     * @param string $file the migration filename
+     *
+     * @return string
+     */
+    static public function getTimestampFromFilename($file)
+    {
+		$time = substr($file, 0, strlen($file) - 4);
+		$t = explode('_', $time);
+		$timestamp = $t[0] . '-' . $t[1] . '-' . $t[2] . 'T' . $t[3] . ':' . $t[4] . ':' . $t[5];
+		return $timestamp;
+    }
+    
+    /**
+     * Returns a filename when given a migration timestamp.
+     *
+     * @param string $timestamp the migration timestamp
+     *
+     * @return string
+     */
+    static public function getFilenameFromTimestamp($timestamp)
+    {
+        return date('Y_m_d_H_i_s', strtotime($timestamp)) . '.php';
+    }
+
+    /**
      * Coverts a string from this_notation to ThisNotation (CamelCase)
      *
      * @param string $no_camel the string in this_notation

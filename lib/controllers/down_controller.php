@@ -27,6 +27,7 @@ class MpmDownController extends MpmController
 	public function doAction()
 	{
 		$clw = MpmCommandLineWriter::getInstance();
+		$clw->writeHeader();
 		$pdo = MpmDb::getPdo();
 		
 		if (count($this->arguments) == 0)
@@ -40,39 +41,10 @@ class MpmDownController extends MpmController
 			return $this->displayHelp();
 		}
 
-		$list = MpmListHelper::getList();
+		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
 		$total = count($list);
-		$last_possible_num = $total - 1;
 		$current = MpmMigrationHelper::getCurrentMigrationNumber();
 
-		$clw->writeHeader();
-		
-		if ($down_to > $last_possible_num)
-		{
-			echo "Unable to migrate down to this migration number.\n";
-			echo "That migration number does not exist.\n";
-			$clw->writeFooter();
-			exit;
-		}
-		if ($down_to == $last_possible_num)
-		{
-			echo "Unable to migrate down to this migration number.\n";
-			echo "Use the latest command instead.\n";
-			$clw->writeFooter();
-			exit;
-		}
-		if ($down_to >= $current)
-		{
-			echo "Unable to migrate down to this migration number.\n";
-			echo "This migration is after your current migration.  Try the up command instead.\n";
-			$clw->writeFooter();
-			exit;
-		}
-		
-		$start = ($current != 0) ? $current : 0;
-		$total_migrations_run = 0;
-		$new_latest = '';
-		
 		if ($down_to == '-1')
 		{
 			echo "Removing all migrations... ";
@@ -80,16 +52,13 @@ class MpmDownController extends MpmController
 		}
 		else
 		{
-			echo "Migrating to " . $list[$down_to]->timestamp . '... ';
+			echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . '... ';
 		}
 		
-		for ($i = $start; $i >= $down_to; $i--)
+		foreach ($list as $id => $obj)
 		{
-			$obj = $list[$i];
-			MpmMigrationHelper::runMigration('down', $obj, $pdo, $new_latest, $total_migrations_run);
+			MpmMigrationHelper::runMigration($obj, 'down');
 		}
-		
-		MpmMigrationHelper::showMigrationResult($latest, $total_migrations_run);
 		$clw->writeFooter();
 	}
 

@@ -18,48 +18,37 @@ class MpmMigrationHelper
 {
 	
 	/**
-	 * Displays results of an up, down, or latest migration.
+	 * Performs a single migration.
 	 *
-	 * @param string &$latest               the timestamp of the latest run migration before the migrations were performed
-	 * @param string &$new_latest           the timestamp of the latest run migration; will be saved
+	 * @param object  $obj        		    a simple object with migration information (from a migration list)
 	 * @param int    &$total_migrations_run a running total of migrations run
 	 *
 	 * @return void
 	 */
-	static public function showMigrationResult(&$latest, &$total_migrations_run)
+	static public function runMigration(&$obj, $method = 'up')
 	{
-		// if no migrations run, we're finished
-		if ($total_migrations_run == 0)
+	    $pdo = MpmDb::getPdo();
+		$pdo->beginTransaction();
+		echo "\n\tPerforming migration " . $obj->timestamp . ' ... ';
+		$filename = MpmStringHelper::getFilenameFromTimestamp($obj->timestamp);
+		$classname = 'Migration_' . str_replace('.php', '', $filename);
+		require_once(MPM_PATH . '/db/' . $filename);
+		$migration = new $classname();
+		if ($method == 'down')
 		{
-			echo "\n\nYou are currently at the latest migration ({$latest}).\n\nNo migrations performed.\n";
+			$active = 0;
 		}
 		else
 		{
-			echo "\n\nMigration complete.  {$total_migrations_run} migrations performed.\n";
+			$active = 1;
 		}
-	}
-	
-	/**
-	 * Performs a single migration.
-	 *
-	 * @param string  $method               the migration method to run (up or down)
-	 * @param object  $obj        		    a simple object with migration information (from a migration list)
-	 * @param PDO    &$pdo        	        a PDO object
-	 * @param string &$new_latest           the timestamp of the latest run migration; will be saved
-	 * @param int    &$total_migrations_run a running total of migrations run
-	 *
-	 * @return void
-	 */
-	static public function runMigration($method, $obj, PDO &$pdo, &$new_latest, &$total_migrations_run)
-	{
-		echo "\n\tPerforming migration " . $obj->timestamp . ' ... ';
-		$pdo->beginTransaction();
-		$classname = 'Migration_' . str_replace('.php', '', $obj->filename);
-		require_once($obj->full_file);
-		$migration = new $classname();
 		try
 		{
 			$migration->$method($pdo);
+			$sql = "UPDATE `mpm_migrations` SET `is_current` = 0";
+			$pdo->exec($sql);
+			$sql = "UPDATE `mpm_migrations` SET `active` = '$active', `is_current` = 1 WHERE `id` = {$obj->id}";
+			$pdo->exec($sql);
 		}
 		catch (Exception $e)
 		{
@@ -67,12 +56,9 @@ class MpmMigrationHelper
 			echo "failed!";
 			echo "\n\t--- " . $e->getMessage();
 			MpmMigrationHelper::saveLatest($new_latest);
-			exit;  
+			exit;
 		}
 		$pdo->commit();
-		$new_latest = $obj->timestamp;
-		MpmMigrationHelper::saveLatest($new_latest);
-		$total_migrations_run++;
 		echo "done.";
 	}
 
@@ -83,14 +69,86 @@ class MpmMigrationHelper
 	 */
 	static public function getCurrentMigrationTimestamp()
 	{
-		// what migration are we on?
-		$sql = "SELECT `latest` FROM `mpm_schema`";
+	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `is_current` = 1";
 		$pdo = MpmDb::getPdo();
 		$stmt = $pdo->query($sql);
+		if ($stmt->rowCount() == 0)
+		{
+		    return false;
+		}
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
-		$latest = $row['latest'];
+		$latest = $row['timestamp'];
 		return $latest;
 	}
+	
+	/**
+	 * Returns an array of migrations which need to be run (in order).
+	 *
+	 * @param int    $toId      the ID of the migration to stop on
+	 * @param string $direction the direction of the migration; should be 'up' or 'down'
+	 *
+	 * @return array
+	 */
+	static public function getListOfMigrations($toId, $direction = 'up')
+	{
+		$pdo = MpmDb::getPdo();
+	    $list = array();
+	    $timestamp = MpmMigrationHelper::getTimestampFromId($toId);
+	    if ($direction == 'up')
+	    {
+	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `timestamp` <= '$timestamp' AND `active` = 0 ORDER BY `timestamp`";
+	    }
+	    else
+	    {
+	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `timestamp` >= '$timestamp' AND `active` = 1 ORDER BY `timestamp` DESC";
+	    }
+        try
+        {
+            $stmt = $pdo->query($sql);
+            while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
+            {
+                $list[$obj->id] = $obj;
+            }
+        }
+        catch (Exception $e)
+        {
+            echo "\n\nError: " . $e->getMessage() . "\n\n";
+            exit;
+        }
+        return $list;
+	}
+
+    /**
+     * Returns a timestamp when given a migration ID number.
+     *
+     * @param int $id the ID number of the migration
+     *
+     * @return string
+     */
+    static public function getTimestampFromId($id)
+    {
+	    $pdo = MpmDb::getPdo();
+	    try
+	    {
+    	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `id` = '$id'";
+    	    $stmt = $pdo->query($sql);
+    	    if ($stmt->rowCount() == 1)
+    	    {
+    	        $result = $stmt->fetch(PDO::FETCH_OBJ);
+    	        $timestamp = $result->timestamp;
+	        }
+	        else
+	        {
+	            $timestamp = false;
+	        }
+        }
+        catch (Exception $e)
+        {
+            echo "\n\nERROR: " . $e->getMessage() . "\n\n";
+            exit;
+        }
+	    return $timestamp;
+    }
 
 	/**
 	 * Returns the number of the migration currently rolled to.
@@ -99,45 +157,16 @@ class MpmMigrationHelper
 	 */
 	static public function getCurrentMigrationNumber()
 	{
-		$timestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
-		$list = MpmListHelper::getList();
-		$number = 0;
-		$total = count($list);
-		for ($i = 0; $i < $total; $i++)
-		{
-			if ($list[$i]->timestamp == $timestamp)
-			{
-				$number = $i;
-				break;
-			}
-		}
-		return $number;
-	}
-
-	/**
-	 * Saves the latest migration to the schema table.
-	 *
-	 * @param string $latest the timestamp of the latest migration
-	 *
-	 * @return void
-	 */
-	static public function saveLatest($latest)
-	{
+	    $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
 		$pdo = MpmDb::getPdo();
-		$pdo->beginTransaction();
-		try
+		$stmt = $pdo->query($sql);
+		if ($stmt->rowCount() == 0)
 		{
-			$sql = "INSERT INTO `mpm_schema` SET `id` = 1, `latest` = '$latest' ON DUPLICATE KEY UPDATE `latest` = '$latest'";
-			$pdo->exec($sql);
+		    return false;
 		}
-		catch (Exception $e)
-		{
-			$pdo->rollback();
-			echo "\n\nERROR -- " . $e->getMessage();
-			echo "\n\n";
-			exit;
-		}
-		$pdo->commit();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		$latest = $row['id'];
+		return $latest;
 	}
 	
 }
