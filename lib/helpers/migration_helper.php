@@ -16,6 +16,28 @@
  */
 class MpmMigrationHelper
 {
+    
+    static public function setCurrentMigration($id)
+    {
+	    $pdo = MpmDb::getPdo();
+		$pdo->beginTransaction();
+		try
+		{
+			$sql = "UPDATE `mpm_migrations` SET `is_current` = '0'";
+			$pdo->exec($sql);
+			$sql = "UPDATE `mpm_migrations` SET `is_current` = '1' WHERE `id` = {$id}";
+			$pdo->exec($sql);
+		}
+		catch (Exception $e)
+		{
+			$pdo->rollback();
+			echo "\n\tQuery failed!";
+			echo "\n\t--- " . $e->getMessage();
+			exit;
+		}
+		$pdo->commit();
+    }
+    
 	
 	/**
 	 * Performs a single migration.
@@ -29,7 +51,7 @@ class MpmMigrationHelper
 	{
 	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
-		echo "\n\tPerforming migration " . $obj->timestamp . ' ... ';
+		echo "\n\tPerforming migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
 		$filename = MpmStringHelper::getFilenameFromTimestamp($obj->timestamp);
 		$classname = 'Migration_' . str_replace('.php', '', $filename);
 		require_once(MPM_PATH . '/db/' . $filename);
@@ -45,9 +67,7 @@ class MpmMigrationHelper
 		try
 		{
 			$migration->$method($pdo);
-			$sql = "UPDATE `mpm_migrations` SET `is_current` = 0";
-			$pdo->exec($sql);
-			$sql = "UPDATE `mpm_migrations` SET `active` = '$active', `is_current` = 1 WHERE `id` = {$obj->id}";
+			$sql = "UPDATE `mpm_migrations` SET `active` = '$active' WHERE `id` = {$obj->id}";
 			$pdo->exec($sql);
 		}
 		catch (Exception $e)
@@ -55,7 +75,6 @@ class MpmMigrationHelper
 			$pdo->rollback();
 			echo "failed!";
 			echo "\n\t--- " . $e->getMessage();
-			MpmMigrationHelper::saveLatest($new_latest);
 			exit;
 		}
 		$pdo->commit();
@@ -96,11 +115,11 @@ class MpmMigrationHelper
 	    $timestamp = MpmMigrationHelper::getTimestampFromId($toId);
 	    if ($direction == 'up')
 	    {
-	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `timestamp` <= '$timestamp' AND `active` = 0 ORDER BY `timestamp`";
+	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `active` = 0 AND `timestamp` <= '$timestamp' ORDER BY `timestamp`";
 	    }
 	    else
 	    {
-	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `timestamp` >= '$timestamp' AND `active` = 1 ORDER BY `timestamp` DESC";
+	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `active` = 1 AND `timestamp` > '$timestamp' ORDER BY `timestamp` DESC";
 	    }
         try
         {

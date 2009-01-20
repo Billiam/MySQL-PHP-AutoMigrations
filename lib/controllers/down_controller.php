@@ -40,6 +40,10 @@ class MpmDownController extends MpmController
 		{
 			return $this->displayHelp();
 		}
+		if ($down_to == 0)
+		{
+		    $down_to = -1;
+		}
 
 		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
 		$total = count($list);
@@ -52,13 +56,16 @@ class MpmDownController extends MpmController
 		}
 		else
 		{
-			echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . '... ';
+			echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . ' (ID '.$down_to.')... ';
 		}
 		
 		foreach ($list as $id => $obj)
 		{
 			MpmMigrationHelper::runMigration($obj, 'down');
 		}
+		
+		MpmMigrationHelper::setCurrentMigration($down_to);
+		
 		$clw->writeFooter();
 	}
 
@@ -78,6 +85,8 @@ class MpmDownController extends MpmController
 		$obj->addText('This command is used to migrate down to a previous version.  You can get a list of all of the migrations available by using the list command.');
 		$obj->addText(' ');
 		$obj->addText('You must specify a migration # (as provided by the list command)');
+		$obj->addText(' ');
+		$obj->addText('If you enter a migration number of 0 or -1, all migrations will be removed.');
 		$obj->addText(' ');
 		$obj->addText('Valid Examples:');
 		$obj->addText('./migrate.php down 14', 4);

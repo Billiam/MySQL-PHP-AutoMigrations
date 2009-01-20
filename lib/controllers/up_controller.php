@@ -29,8 +29,6 @@ class MpmUpController extends MpmController
 		$clw = MpmCommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
-		$this->rollBackInterleaves();
-		
 		$pdo = MpmDb::getPdo();
 		
 		if (count($this->arguments) == 0)
@@ -47,68 +45,26 @@ class MpmUpController extends MpmController
         // what migrations need to be done?
         $list = MpmMigrationHelper::getListOfMigrations($up_to);
         
-        // get latest timestamp
-        $latest = MpmMigrationHelper::getCurrentMigrationTimestamp();
-        if ($latest === false)
-        {
-            $latest = 'no migrations run';
-        }
-        
-        // get current migration number
-        $current = MpmMigrationHelper::getCurrentMigrationNumber();
-        
 		if (count($list) == 0)
 		{
-		    echo 'No migrations need to be run.  Latest migration: ' . $latest;
+		    echo 'All needed migrations have already been run or no migrations exist.';
 		    $clw->writeFooter();
 		    exit;
 		}
 		
 		$to = MpmMigrationHelper::getTimestampFromId($up_to);
 		
-		echo "Migrating to " . $to . '... ';
+		echo "Migrating to " . $to . ' (ID '.$up_to.')... ';
 		
 		foreach ($list as $id => $obj)
 		{
 		    MpmMigrationHelper::runMigration($obj);
 		}
 		
+		MpmMigrationHelper::setCurrentMigration($up_to);
+		
 		$clw->writeFooter();
 	}
-
-    /**
-     * If interleaved migrations are found, this method rolls back to that migration.  Called before the up command runs.
-     *
-     * @return void
-     */
-    private function rollBackInterleaves()
-    {
-        // any new migrations prior to current?
-        $pdo = MpmDb::getPdo();
-		$currentTimestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
-        $sql = "SELECT `id` FROM `mpm_migrations` WHERE `timestamp` < '$currentTimestamp' AND `active` = 0 ORDER BY `timestamp` LIMIT 0,1";
-        try
-        {
-            $stmt = $pdo->query($sql);
-            if ($stmt->rowCount() == 1)
-            {
-                $result = $stmt->fetch(PDO::FETCH_OBJ);
-                $timestamp = MpmMigrationHelper::getTimestampFromId($result->id);
-                echo "Interleaved Migration(s) Found... Rolling Back...";
-				$list = MpmMigrationHelper::getListOfMigrations($result->id, 'down');
-				foreach ($list as $obj)
-				{
-					MpmMigrationHelper::runMigration($obj, 'down');
-				}
-				echo "\n\n";
-            }
-        }
-		catch (Exception $e)
-		{
-			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
-		}
-    }
 
 	/**
 	 * Displays the help page for this controller.
