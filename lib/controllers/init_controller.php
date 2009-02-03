@@ -121,14 +121,7 @@ class MpmInitController extends MpmController
 		
 		try
 		{
-			$pdo = MpmDb::getPdo();
-			$sql = "SHOW TABLES";
-			$tables = array();
-			foreach ($pdo->query($sql) as $row)
-			{
-				$tables[] = $row[0];
-			}
-			if (!in_array('mpm_migrations', $tables))
+			if (false === $this->checkForDbTable())
 			{
 				echo "not found.\n";
 				echo "Creating migrations table... ";
