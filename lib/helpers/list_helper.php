@@ -125,6 +125,11 @@ class MpmListHelper
         $pdo->commit();
     }
     
+    /**
+     * Given an array of objects (from the getFullList() or getListOfFiles() methods), returns an array of timestamps.
+     *
+     * @return array
+     */
     static function getTimestampArray($obj_array)
     {
         $timestamp_array = array();
