@@ -29,6 +29,13 @@ class MpmLatestController extends MpmController
 		// make sure we're init'd
 		$this->checkIfReady();
 		
+		// are we forcing this?
+		$forced = '';
+		if (isset($this->arguments[0]) && strcasecmp($this->arguments[0], '--force') == 0)
+		{
+		    $forced = '--force';
+		}
+		
 		try
 		{
 			$pdo = MpmDb::getPdo();
@@ -43,7 +50,7 @@ class MpmLatestController extends MpmController
 			}
 			$result = $stmt->fetch(PDO::FETCH_OBJ);
 			$to_id = $result->id;
-			$obj = new MpmUpController('up', array ( $to_id ));
+			$obj = new MpmUpController('up', array ( $to_id, $forced ));
 			$obj->doAction();
 		}
 		catch (Exception $e)
@@ -64,12 +71,15 @@ class MpmLatestController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php latest');
+		$obj->addText('./migrate.php latest [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate up to the most recent version.  No arguments are required.');
 		$obj->addText(' ');
-		$obj->addText('Valid Example:');
+		$obj->addText('If the --force option is provided, then the script will automatically skip over any migrations which cause errors and continue migrating forward.');
+		$obj->addText(' ');
+		$obj->addText('Valid Examples:');
 		$obj->addText('./migrate.php latest', 4);
+		$obj->addText('./migrate.php latest --force', 4);
 		$obj->write();
 	}
 	

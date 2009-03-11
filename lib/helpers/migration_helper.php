@@ -44,14 +44,15 @@ class MpmMigrationHelper
 	 *
 	 * @param object  $obj        		    a simple object with migration information (from a migration list)
 	 * @param int    &$total_migrations_run a running total of migrations run
+	 * @param bool    $forced               if true, exceptions will not cause the script to exit
 	 *
 	 * @return void
 	 */
-	static public function runMigration(&$obj, $method = 'up')
+	static public function runMigration(&$obj, $method = 'up', $forced = false)
 	{
 	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
-		echo "\n\tPerforming migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
+		echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
 		$filename = MpmStringHelper::getFilenameFromTimestamp($obj->timestamp);
 		$classname = 'Migration_' . str_replace('.php', '', $filename);
 		require_once(MPM_PATH . '/db/' . $filename);
@@ -74,8 +75,18 @@ class MpmMigrationHelper
 		{
 			$pdo->rollback();
 			echo "failed!";
-			echo "\n\t--- " . $e->getMessage();
-			exit;
+			echo "\n";
+		    $clw = MpmCommandLineWriter::getInstance();
+    		$clw->writeLine($e->getMessage(), 12);
+			if (!$forced)
+			{
+        		echo "\n\n";
+			    exit;
+			}
+			else
+			{
+			    return;
+		    }
 		}
 		$pdo->commit();
 		echo "done.";

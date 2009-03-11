@@ -65,6 +65,7 @@ class MpmHelpController extends MpmController
 		$obj->addText('init   - initialize the migrations', 4);
 		$obj->addText('latest - roll up to the latest migration', 4);
 		$obj->addText('list   - list all migrations', 4);
+		$obj->addText('run    - runs a single migration', 4);
 		$obj->addText('status - show the current migration', 4);
 		$obj->addText('up     - roll up to a future migration', 4);
 		$obj->addText(' ');

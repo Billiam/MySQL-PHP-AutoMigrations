@@ -90,12 +90,13 @@ class MpmCommandLineWriter
 		$blank->indent = 0;
 		array_unshift($this->text, $blank);
 		
-		$max_line_len = $this->maxWidth;
+		$max_line_len = $this->maxWidth - 10;
 		$bar = '';
 		for ($i = 0; $i < $max_line_len; $i++)
 		{
 			$bar .= "*";
 		}
+		$bar .= ' v' . MPM_VERSION . ' ***';
 		$bar_obj = (object) array();
 		$bar_obj->text = $bar;
 		$bar_obj->indent = 0;
@@ -119,7 +120,6 @@ class MpmCommandLineWriter
 			$txt->indent = 0;
 			array_unshift($this->text, $txt);
 		}
-		//array_unshift($this->text, $bar_obj);
 	}
 	
 	/**
@@ -186,6 +186,39 @@ class MpmCommandLineWriter
 			$body .= "\n";
 		}
 		echo $body;
+	}
+	
+	public function writeLine($txt, $ind = 0)
+	{
+	    $obj = (Object) array();
+	    $obj->text = $txt;
+	    $obj->indent = $ind;
+	    $max_line_len = $this->maxWidth;
+		$wrap_point = $max_line_len - $obj->indent - 1;
+		$indent = '';
+		$all_lines = array();
+		for ($i = 0; $i < $obj->indent; $i++)
+		{
+			$indent .= " ";
+		}
+		$lines_str = wordwrap($obj->text, $wrap_point, "---");
+		$lines = explode("---", $lines_str);
+		$body = '';
+		foreach ($lines as $line)
+		{
+			$all_lines[] = $indent . $line;
+		}
+		foreach ($all_lines as $line)
+		{
+		    $body .= $line;
+			for ($i = 0; $i < $max_line_len - strlen($line); $i++)
+			{
+				$body .= " ";
+			}
+			$body .= "\n";
+		}
+		echo $body;
+		return;
 	}
 	
 	public function writeHeader()

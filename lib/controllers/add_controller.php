@@ -9,7 +9,7 @@
  */
 
 /**
- * The MpmUpController is used to migrate up to a new version.
+ * The MpmAddController is used to create a new migration script.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -91,16 +91,12 @@ class MpmAddController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php add [description]');
+		$obj->addText('./migrate.php add');
 		$obj->addText(' ');
 		$obj->addText('This command is used to create a new migration script.  The script will be created and prepopulated with the up() and down() methods which you can then modify for the migration.');
 		$obj->addText(' ');
-		$obj->addText('The description must be less than 40 characters and words should be separated by underscores.  It should be a very short explanation of what the migration does.');
-		$obj->addText(' ');
-		$obj->addText('Valid Examples:');
-		$obj->addText('./migrate.php add create_users_table', 4);
-		$obj->addText('./migrate.php add alter_accounts_table', 4);
-		$obj->addText('./migrate.php add setup_initial_project_schema', 4);
+		$obj->addText('Valid Example:');
+		$obj->addText('./migrate.php add', 4);
 		$obj->write();
 	}
 	

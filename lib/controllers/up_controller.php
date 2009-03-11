@@ -37,9 +37,17 @@ class MpmUpController extends MpmController
 		}
 		
 		$up_to = $this->arguments[0];
+		
 		if (!is_numeric($up_to))
 		{
 			return $this->displayHelp();
+		}
+		
+		// are we forcing this?
+		$forced = false;
+		if (isset($this->arguments[1]) && strcasecmp($this->arguments[1], '--force') == 0)
+		{
+		    $forced = true;
 		}
 
         // what migrations need to be done?
@@ -58,7 +66,7 @@ class MpmUpController extends MpmController
 		
 		foreach ($list as $id => $obj)
 		{
-		    MpmMigrationHelper::runMigration($obj);
+		    MpmMigrationHelper::runMigration($obj, 'up', $forced);
 		}
 		
 		MpmMigrationHelper::setCurrentMigration($up_to);
@@ -77,15 +85,17 @@ class MpmUpController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php up [migration #]');
+		$obj->addText('./migrate.php up [migration #] [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate up to a newer version.  You can get a list of all of the migrations available by using the list command.');
 		$obj->addText(' ');
 		$obj->addText('You must specify a migration # (as provided by the list command)');
 		$obj->addText(' ');
+		$obj->addText('If the --force option is provided, then the script will automatically skip over any migrations which cause errors and continue migrating forward.');
+		$obj->addText(' ');
 		$obj->addText('Valid Examples:');
 		$obj->addText('./migrate.php up 14', 4);
-		$obj->addText('./migrate.php up 12', 4);
+		$obj->addText('./migrate.php up 12 --force', 4);
 		$obj->write();
 	}
 	

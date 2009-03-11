@@ -44,7 +44,14 @@ class MpmDownController extends MpmController
 		{
 		    $down_to = -1;
 		}
-
+		
+		// are we forcing this?
+		$forced = false;
+		if (isset($this->arguments[1]) && strcasecmp($this->arguments[1], '--force') == 0)
+		{
+		    $forced = true;
+		}
+		
 		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
 		$total = count($list);
 		$current = MpmMigrationHelper::getCurrentMigrationNumber();
@@ -61,7 +68,7 @@ class MpmDownController extends MpmController
 		
 		foreach ($list as $id => $obj)
 		{
-			MpmMigrationHelper::runMigration($obj, 'down');
+			MpmMigrationHelper::runMigration($obj, 'down', $forced);
 		}
 		
 		MpmMigrationHelper::setCurrentMigration($down_to);
@@ -80,7 +87,7 @@ class MpmDownController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php down [migration #]');
+		$obj->addText('./migrate.php down [migration #] [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate down to a previous version.  You can get a list of all of the migrations available by using the list command.');
 		$obj->addText(' ');
@@ -88,9 +95,11 @@ class MpmDownController extends MpmController
 		$obj->addText(' ');
 		$obj->addText('If you enter a migration number of 0 or -1, all migrations will be removed.');
 		$obj->addText(' ');
+		$obj->addText('If the --force option is provided, then the script will automatically skip over any migrations which cause errors and continue migrating backward.');
+		$obj->addText(' ');
 		$obj->addText('Valid Examples:');
 		$obj->addText('./migrate.php down 14', 4);
-		$obj->addText('./migrate.php down 12', 4);
+		$obj->addText('./migrate.php down 12 --force', 4);
 		$obj->write();
 	}
 	
