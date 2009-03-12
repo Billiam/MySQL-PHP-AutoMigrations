@@ -1,45 +1,34 @@
-------------------------------------------------------------------------------
-VERSION 1.4
-------------------------------------------------------------------------------
-    - fixed bug: when using migration script on same database but different
-      branches of a repository, migrations between rollups were being deleted;
-      after rollup, file re-appeared but script thought it hadn't been run
-      yet, tried to re-run it, and caused an error.
+= VERSION 1.4.1 =
 
-------------------------------------------------------------------------------
-VERSION 1.3
-------------------------------------------------------------------------------
-    - added --force option to the up, down, and latest commands; this will
-      force the script to continue execution despite any migration errors that
-      occur
-    - added run command to allow the execution of a single migration
-    - fixed bug: when migration scripts are removed, the script will now
-      remove the entry from the database tracking table; this should stop
-      missing file exceptions when running the up, down, or latest commands
-    - fixed bug: when running init, an exception was thrown if the 
-      db_config.php was missing or PDO was unable to connect to the database
-    - added current version number to ASCII header
+  * updated version number from 1.3
 
-------------------------------------------------------------------------------
-VERSION 1.2
-------------------------------------------------------------------------------
-    - fixed interleaving so it doesn't roll back before rolling back up
-    - added ability to remove all migrations by doing ./migrate.php down 0
+= VERSION 1.4.0 =
 
-------------------------------------------------------------------------------
-VERSION 1.1
-------------------------------------------------------------------------------
-    - now stores migration information in database table;
-    - supports migration interleaving (insertion of migrations between 
-      migrations which have already been run)
+  * fixed bug: when using migration script on same database but different branches of a repository, migrations between rollups were being deleted; after rollup, file re-appeared but script thought it hadn't been run yet, tried to re-run it, and caused an error.
+
+= VERSION 1.3.0 =
+
+  * added --force option to the up, down, and latest commands; this will force the script to continue execution despite any migration errors that occur
+  * added run command to allow the execution of a single migration
+  * fixed bug: when migration scripts are removed, the script will now remove the entry from the database tracking table; this should stop missing file exceptions when running the up, down, or latest commands
+  * fixed bug: when running init, an exception was thrown if the db_config.php was missing or PDO was unable to connect to the database
+  * added current version number to ASCII header
+
+= VERSION 1.2.0 =
+
+  * fixed interleaving so it doesn't roll back before rolling back up
+  * added ability to remove all migrations by doing ./migrate.php down 0
+
+= VERSION 1.1.0 =
+
+  * now stores migration information in database table;
+  * supports migration interleaving (insertion of migrations between migrations which have already been run)
 	
-------------------------------------------------------------------------------
-VERSION 1.0 (First Release)
-------------------------------------------------------------------------------
-	- able to initialize migrations via command line prompts
-	- integrated help system
-	- able to migrate to latest, up to a specific migration, or down to a 
-	  specific migration
-	- able to list all migrations
-	- able to get status
-	- able to add new migrations
+= VERSION 1.0.0 (First Release) =
+
+  * able to initialize migrations via command line prompts
+  * integrated help system
+  * able to migrate to latest, up to a specific migration, or down to a specific migration
+  * able to list all migrations
+  * able to get status
+  * able to add new migrations
