@@ -99,7 +99,7 @@ class MpmListHelper
         }
         $pdo->commit();
         $pdo->beginTransaction();
-        // remove migrations from the database which no longer have a corresponding file
+        // remove migrations from the database which no longer have a corresponding file and are not active yet
         try
         {
             $total_migrations = MpmListHelper::getTotalMigrations();
@@ -108,7 +108,7 @@ class MpmListHelper
             $file_timestamps = MpmListHelper::getTimestampArray($files);
             foreach ($db_list as $obj)
             {
-                if (!in_array($obj->timestamp, $file_timestamps))
+                if (!in_array($obj->timestamp, $file_timestamps) && $obj->active == 0)
                 {
                     $sql = "DELETE FROM `mpm_migrations` WHERE `id` = '{$obj->id}'";
                     $pdo->exec($sql);

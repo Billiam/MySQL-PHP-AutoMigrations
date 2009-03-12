@@ -1,4 +1,12 @@
 ------------------------------------------------------------------------------
+VERSION 1.4
+------------------------------------------------------------------------------
+    - fixed bug: when using migration script on same database but different
+      branches of a repository, migrations between rollups were being deleted;
+      after rollup, file re-appeared but script thought it hadn't been run
+      yet, tried to re-run it, and caused an error.
+
+------------------------------------------------------------------------------
 VERSION 1.3
 ------------------------------------------------------------------------------
     - added --force option to the up, down, and latest commands; this will
