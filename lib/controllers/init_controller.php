@@ -93,6 +93,13 @@ class MpmInitController extends MpmController
 		$file .= '$db_config->user = ' . "'" . $user . "';" . "\n";
 		$file .= '$db_config->pass = ' . "'" . $pass . "';" . "\n";
 		$file .= '$db_config->name = ' . "'" . $dbname . "';" . "\n";
+		$file .= "\n";
+        $file .= '/*' . "\n";
+        $file .= ' * This should be uncommented and defined if you want to store your migration scripts outside of the migration code base.' . "\n";
+        $file .= ' * This is especially useful if you are using these as part of your project as an svn external.' . "\n";
+        $file .= ' * MAKE SURE IT ENDS IN A SLASH OR IT WILL BREAK EVERYTHING!' . "\n";
+        $file .= ' */' . "\n";
+        $file .= '#$db_config->db_path = "/Full/path/to/migration/scripts/";' . "\n";
 		$file .= "\n?>";
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
