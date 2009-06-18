@@ -54,7 +54,7 @@ class MpmMigrationHelper
 		$classname = 'Migration_' . str_replace('.php', '', $filename);
 		
 	    // make sure the file exists; if it doesn't, skip it but display a message
-	    if (!file_exists(MPM_PATH . '/db/' . $filename))
+	    if (!file_exists(MPM_DB_PATH . $filename))
 	    {
 	        echo "\n\tMigration " . $obj->timestamp . ' (ID '.$obj->id.') skipped - file missing.';
 	        return;
@@ -64,7 +64,7 @@ class MpmMigrationHelper
 		echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
 	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
-		require_once(MPM_PATH . '/db/' . $filename);
+		require_once(MPM_DB_PATH . $filename);
 		$migration = new $classname();
 		if ($method == 'down')
 		{

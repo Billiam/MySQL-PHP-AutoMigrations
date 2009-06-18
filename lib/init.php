@@ -16,6 +16,24 @@ if (file_exists(MPM_PATH . '/config/db_config.php'))
 	require_once(MPM_PATH . '/config/db_config.php');
 }
 
+if (!defined('MPM_DB_PATH'))
+{
+    if (isset($db_config->db_path) && strlen($db_config->db_path) > 0)
+    {
+        /**
+         * Defines the MPM_DB_PATH if specified.  Allows this to be outside of the main migration script library.
+         */
+        define('MPM_DB_PATH', $db_config->db_path);
+    }
+    else
+    {
+        /**
+         * @ignore
+         */
+        define('MPM_DB_PATH', MPM_PATH . '/db/');
+    }
+}
+
 /**
  * Include the MpmClassUndefinedException class.
  */

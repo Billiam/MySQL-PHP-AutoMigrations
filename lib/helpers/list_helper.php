@@ -158,10 +158,10 @@ class MpmListHelper
 		{
 			$sort_order = 0;
 		}
-		$files = scandir(MPM_PATH . '/db/', $sort_order);
+		$files = scandir(MPM_DB_PATH, $sort_order);
 		foreach ($files as $file)
 		{
-			$full_file = MPM_PATH . '/db/' . $file;
+			$full_file = MPM_DB_PATH . $file;
 			if ($file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
 			{
                 $timestamp = MpmStringHelper::getTimestampFromFilename($file);
