@@ -29,6 +29,7 @@ class MpmInitController extends MpmController
 		$user = '';
 		$dbname = '';
 		$port = '';
+		$db_path = '';
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
 		{
@@ -86,6 +87,18 @@ class MpmInitController extends MpmController
 			$dbname = trim($dbname);
 		}
 		
+		echo "\nEnter the directory where you'd like to store your migration files [".MPM_PATH."/db/]: ";
+		$db_path = fgets(STDIN);
+		$db_path = trim($db_path);
+		if (empty($db_path))
+		{
+		    $db_path = MPM_PATH . '/db/';
+		}
+		if (substr($db_path, strlen($db_path) - 1, 1) != '/')
+		{
+		    $db_path .= '/';
+		}
+		
 		$file = '<?php' . "\n\n";
 		$file .= '$db_config = (object) array();' . "\n";
 		$file .= '$db_config->host = ' . "'" . $host . "';" . "\n";
@@ -93,13 +106,7 @@ class MpmInitController extends MpmController
 		$file .= '$db_config->user = ' . "'" . $user . "';" . "\n";
 		$file .= '$db_config->pass = ' . "'" . $pass . "';" . "\n";
 		$file .= '$db_config->name = ' . "'" . $dbname . "';" . "\n";
-		$file .= "\n";
-        $file .= '/*' . "\n";
-        $file .= ' * This should be uncommented and defined if you want to store your migration scripts outside of the migration code base.' . "\n";
-        $file .= ' * This is especially useful if you are using these as part of your project as an svn external.' . "\n";
-        $file .= ' * MAKE SURE IT ENDS IN A SLASH OR IT WILL BREAK EVERYTHING!' . "\n";
-        $file .= ' */' . "\n";
-        $file .= '#$db_config->db_path = "/Full/path/to/migration/scripts/";' . "\n";
+        $file .= '$db_config->db_path = ' . "'" . $db_path . "';" . "\n";
 		$file .= "\n?>";
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
