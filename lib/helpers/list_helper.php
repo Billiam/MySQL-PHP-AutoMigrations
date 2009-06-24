@@ -208,13 +208,18 @@ class MpmListHelper
 			if ($direction == 'down')
 			{
 				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
+				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
 			}
 			else
 			{
 				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
+				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
 			}
+			$stmt = $pdo->query($countSql);
+    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+			$count = $stmt->fetchColumn();
 			$stmt = $pdo->query($sql);
-			if ($stmt->rowCount() > 0)
+			if ($count > 0)
 			{
 				while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
 				{
