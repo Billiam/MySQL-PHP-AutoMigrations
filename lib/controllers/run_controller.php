@@ -85,6 +85,7 @@ class MpmRunController extends MpmController
 		}
 		
 		$sql = "SELECT * FROM `mpm_migrations` WHERE `id` = '$num'";
+		unset($stmt);
 		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_OBJ);
 		$obj = MpmCommandLineWriter::getInstance();

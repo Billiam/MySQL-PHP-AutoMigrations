@@ -117,6 +117,7 @@ class MpmMigrationHelper
 		    return false;
 		}
 	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `is_current` = 1";
+	    unset($stmt);
 		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$latest = $row['timestamp'];
@@ -177,6 +178,7 @@ class MpmMigrationHelper
     	    $stmt = $pdo->query($sql);
     	    if ($stmt->fetchColumn() == 1)
     	    {
+    	        unset($stmt);
         	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `id` = '$id'";
         	    $stmt = $pdo->query($sql);
     	        $result = $stmt->fetch(PDO::FETCH_OBJ);
@@ -211,6 +213,7 @@ class MpmMigrationHelper
 		    return false;
 		}
 	    $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
+	    unset($stmt);
 		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$latest = $row['id'];

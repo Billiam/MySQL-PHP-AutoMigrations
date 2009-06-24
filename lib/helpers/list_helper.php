@@ -218,6 +218,7 @@ class MpmListHelper
 			$stmt = $pdo->query($countSql);
     	    // Resolution to Issue #1 - PDO::rowCount is not reliable
 			$count = $stmt->fetchColumn();
+			unset($stmt);
 			$stmt = $pdo->query($sql);
 			if ($count > 0)
 			{

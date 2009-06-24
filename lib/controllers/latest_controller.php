@@ -20,7 +20,7 @@ class MpmLatestController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmLatestController::displayHelp()
+	 * @uses MpmLatestController::dissplayHelp()
 	 * 
 	 * @return void
 	 */
@@ -50,6 +50,7 @@ class MpmLatestController extends MpmController
 				exit;
 			}
 			$sql = "SELECT `id` FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
+			unset($stmt);
 			$stmt = $pdo->query($sql);
 			$result = $stmt->fetch(PDO::FETCH_OBJ);
 			$to_id = $result->id;
