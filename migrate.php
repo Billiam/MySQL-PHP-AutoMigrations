@@ -20,9 +20,9 @@ error_reporting(E_ALL);
 define('MPM_PATH', dirname(__FILE__));
 
 /**
- * 
+ * Version Number - for reference
  */
-define('MPM_VERSION', '1.4.1');
+define('MPM_VERSION', '1.4.2');
 
 /**
  * Include the init script.
