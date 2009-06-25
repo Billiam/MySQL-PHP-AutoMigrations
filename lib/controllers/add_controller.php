@@ -58,7 +58,7 @@ class MpmAddController extends MpmController
 		$file .= "}\n\n";
 		$file .= "?>";
 		
-		$fp = fopen(MPM_PATH . '/db/' . $filename, "w");
+		$fp = fopen(MPM_DB_PATH . $filename, "w");
 		if ($fp == false)
 		{
 			$obj = MpmCommandLineWriter::getInstance();

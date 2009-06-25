@@ -28,6 +28,11 @@ class MpmStringHelper
     {
 		$time = substr($file, 0, strlen($file) - 4);
 		$t = explode('_', $time);
+		// Fix for problem when file doesn't exist and comes in as an empty string, then throws undefined offset errors
+		if (count($t) != 6)
+		{
+		    return null;
+		}
 		$timestamp = $t[0] . '-' . $t[1] . '-' . $t[2] . 'T' . $t[3] . ':' . $t[4] . ':' . $t[5];
 		return $timestamp;
     }

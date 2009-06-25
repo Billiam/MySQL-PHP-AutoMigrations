@@ -54,7 +54,7 @@ class MpmMigrationHelper
 		$classname = 'Migration_' . str_replace('.php', '', $filename);
 		
 	    // make sure the file exists; if it doesn't, skip it but display a message
-	    if (!file_exists(MPM_PATH . '/db/' . $filename))
+	    if (!file_exists(MPM_DB_PATH . $filename))
 	    {
 	        echo "\n\tMigration " . $obj->timestamp . ' (ID '.$obj->id.') skipped - file missing.';
 	        return;
@@ -64,7 +64,7 @@ class MpmMigrationHelper
 		echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
 	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
-		require_once(MPM_PATH . '/db/' . $filename);
+		require_once(MPM_DB_PATH . $filename);
 		$migration = new $classname();
 		if ($method == 'down')
 		{
@@ -108,13 +108,17 @@ class MpmMigrationHelper
 	 */
 	static public function getCurrentMigrationTimestamp()
 	{
-	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `is_current` = 1";
+	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+	    $sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `is_current` = 1";
 		$pdo = MpmDb::getPdo();
 		$stmt = $pdo->query($sql);
-		if ($stmt->rowCount() == 0)
+		if ($stmt->fetchColumn() == 0)
 		{
 		    return false;
 		}
+	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `is_current` = 1";
+	    unset($stmt);
+		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$latest = $row['timestamp'];
 		return $latest;
@@ -169,10 +173,14 @@ class MpmMigrationHelper
 	    $pdo = MpmDb::getPdo();
 	    try
 	    {
-    	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `id` = '$id'";
+    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+    	    $sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `id` = '$id'";
     	    $stmt = $pdo->query($sql);
-    	    if ($stmt->rowCount() == 1)
+    	    if ($stmt->fetchColumn() == 1)
     	    {
+    	        unset($stmt);
+        	    $sql = "SELECT `timestamp` FROM `mpm_migrations` WHERE `id` = '$id'";
+        	    $stmt = $pdo->query($sql);
     	        $result = $stmt->fetch(PDO::FETCH_OBJ);
     	        $timestamp = $result->timestamp;
 	        }
@@ -196,13 +204,17 @@ class MpmMigrationHelper
 	 */
 	static public function getCurrentMigrationNumber()
 	{
-	    $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
 		$pdo = MpmDb::getPdo();
+	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+	    $sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `is_current` = 1";
 		$stmt = $pdo->query($sql);
-		if ($stmt->rowCount() == 0)
+		if ($stmt->fetchColumn() == 0)
 		{
 		    return false;
 		}
+	    $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
+	    unset($stmt);
+		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$latest = $row['id'];
 		return $latest;

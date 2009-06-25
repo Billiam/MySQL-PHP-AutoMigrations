@@ -158,10 +158,10 @@ class MpmListHelper
 		{
 			$sort_order = 0;
 		}
-		$files = scandir(MPM_PATH . '/db/', $sort_order);
+		$files = scandir(MPM_DB_PATH, $sort_order);
 		foreach ($files as $file)
 		{
-			$full_file = MPM_PATH . '/db/' . $file;
+			$full_file = MPM_DB_PATH . $file;
 			if ($file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
 			{
                 $timestamp = MpmStringHelper::getTimestampFromFilename($file);
@@ -208,13 +208,19 @@ class MpmListHelper
 			if ($direction == 'down')
 			{
 				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
+				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
 			}
 			else
 			{
 				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
+				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
 			}
+			$stmt = $pdo->query($countSql);
+    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+			$count = $stmt->fetchColumn();
+			unset($stmt);
 			$stmt = $pdo->query($sql);
-			if ($stmt->rowCount() > 0)
+			if ($count > 0)
 			{
 				while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
 				{
