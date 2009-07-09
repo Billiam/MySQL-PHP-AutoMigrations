@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmInitController class.
+ * This file houses the InitController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -9,18 +10,18 @@
  */
 
 /**
- * The MpmInitController initializes the system so that migrations can start happening.
+ * The InitController initializes the system so that migrations can start happening.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class MpmInitController extends MpmController
+class InitController extends Controller
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmInitController::displayHelp()
+	 * @uses InitController::displayHelp()
 	 * 
 	 * @return void
 	 */
@@ -99,7 +100,8 @@ class MpmInitController extends MpmController
 		    $db_path .= '/';
 		}
 		
-		$file = '<?php' . "\n\n";
+		$file = '<?php' . "\n";
+		$file .= 'namespace ReflexSolutions\\MysqlPhpMigrations;' . "\n\n";
 		$file .= '$db_config = (object) array();' . "\n";
 		$file .= '$db_config->host = ' . "'" . $host . "';" . "\n";
 		$file .= '$db_config->port = ' . "'" . $port . "';" . "\n";
@@ -141,7 +143,7 @@ class MpmInitController extends MpmController
 				echo "Creating migrations table... ";
 				$sql1 = "CREATE TABLE IF NOT EXISTS `mpm_migrations` ( `id` INT(11) NOT NULL AUTO_INCREMENT, `timestamp` DATETIME NOT NULL, `active` TINYINT(1) NOT NULL DEFAULT 0, `is_current` TINYINT(1) NOT NULL DEFAULT 0, PRIMARY KEY ( `id` ) ) ENGINE=InnoDB";
 				$sql2 = "CREATE UNIQUE INDEX `TIMESTAMP_INDEX` ON `mpm_migrations` ( `timestamp` )";
-				$pdo = MpmDb::getPdo();
+				$pdo = Db::getPdo();
 				$pdo->beginTransaction();
 				try
 				{
@@ -178,14 +180,14 @@ class MpmInitController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses MpmCommandLineWriter::addText()
-	 * @uses MpmCommandLineWriter::write()
+	 * @uses CommandLineWriter::addText()
+	 * @uses CommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = MpmCommandLineWriter::getInstance();
+		$obj = CommandLineWriter::getInstance();
 		$obj->addText('./migrate.php init');
 		$obj->addText(' ');
 		$obj->addText('This command is used to initialize the migration system for use with your particular deployment.  After you have modified the /config/db.php configuration file appropriately, you should run this command to setup the initial tracking schema and add your username to the migraiton archive.');

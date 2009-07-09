@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmDb class.
+ * This file houses the Db class.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
@@ -8,13 +9,15 @@
  * @link       http://code.google.com/p/mysql-php-migrations/
  */
 
+use \PDO;
+
 /**
- * The MpmDb class encapsulates the creation of a PDO mysql object.
+ * The Db class encapsulates the creation of a PDO mysql object.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
  */
-class MpmDb
+class Db
 {
 
 	/**
@@ -27,7 +30,7 @@ class MpmDb
 	/**
 	 * Object constructor.
 	 * 
-	 * @return MpmDb
+	 * @return Db
 	 */
 	private function __construct()
 	{
@@ -55,7 +58,7 @@ class MpmDb
 		static $db = NULL;
 		if (is_null($db))
 		{
-			$db = new MpmDb();
+			$db = new Db();
 		}
 		return $db->dbh;
 	}

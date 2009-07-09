@@ -1,4 +1,5 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
  * This file houses the MpmStringHelper class.
  *

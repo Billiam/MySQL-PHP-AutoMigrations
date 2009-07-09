@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmDownController class.
+ * This file houses the DownController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -9,26 +10,26 @@
  */
 
 /**
- * The MpmDownController is used to migrate down to an older version.
+ * The DownController is used to migrate down to an older version.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class MpmDownController extends MpmController
+class DownController extends Controller
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmDownController::displayHelp()
+	 * @uses DownController::displayHelp()
 	 * 
 	 * @return void
 	 */
 	public function doAction()
 	{
-		$clw = MpmCommandLineWriter::getInstance();
+		$clw = CommandLineWriter::getInstance();
 		$clw->writeHeader();
-		$pdo = MpmDb::getPdo();
+		$pdo = Db::getPdo();
 		
 		if (count($this->arguments) == 0)
 		{
@@ -52,9 +53,9 @@ class MpmDownController extends MpmController
 		    $forced = true;
 		}
 		
-		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
+		$list = MigrationHelper::getListOfMigrations($down_to, 'down');
 		$total = count($list);
-		$current = MpmMigrationHelper::getCurrentMigrationNumber();
+		$current = MigrationHelper::getCurrentMigrationNumber();
 
 		if ($down_to == '-1')
 		{
@@ -63,15 +64,15 @@ class MpmDownController extends MpmController
 		}
 		else
 		{
-			echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . ' (ID '.$down_to.')... ';
+			echo "Migrating to " . MigrationHelper::getTimestampFromId($down_to) . ' (ID '.$down_to.')... ';
 		}
 		
 		foreach ($list as $id => $obj)
 		{
-			MpmMigrationHelper::runMigration($obj, 'down', $forced);
+			MigrationHelper::runMigration($obj, 'down', $forced);
 		}
 		
-		MpmMigrationHelper::setCurrentMigration($down_to);
+		MigrationHelper::setCurrentMigration($down_to);
 		
 		$clw->writeFooter();
 	}
@@ -79,14 +80,14 @@ class MpmDownController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses MpmCommandLineWriter::addText()
-	 * @uses MpmCommandLineWriter::write()
+	 * @uses CommandLineWriter::addText()
+	 * @uses CommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = MpmCommandLineWriter::getInstance();
+		$obj = CommandLineWriter::getInstance();
 		$obj->addText('./migrate.php down [migration #] [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate down to a previous version.  You can get a list of all of the migrations available by using the list command.');

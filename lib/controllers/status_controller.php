@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmStatusController class.
+ * This file houses the StatusController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -9,12 +10,12 @@
  */
 
 /**
- * The MpmStatusController is used to display the latest migration.
+ * The StatusController is used to display the latest migration.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class MpmStatusController extends MpmController
+class StatusController extends Controller
 {
 	
 	/**
@@ -28,19 +29,19 @@ class MpmStatusController extends MpmController
 		$this->checkIfReady();
 		
 		// need a pdo object
-		$pdo = MpmDb::getPdo();
+		$pdo = Db::getPdo();
 		
 		// get latest timestamp
-		$latest = MpmMigrationHelper::getCurrentMigrationTimestamp();
+		$latest = MigrationHelper::getCurrentMigrationTimestamp();
 		
 		// get latest number
-		$num = MpmMigrationHelper::getCurrentMigrationNumber();
+		$num = MigrationHelper::getCurrentMigrationNumber();
 		
 		// get list of migrations
 		$list = MpmListHelper::getFullList();
 		
 		// get command line writer
-		$clw = MpmCommandLineWriter::getInstance();
+		$clw = CommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
 		if (empty($latest))
@@ -58,14 +59,14 @@ class MpmStatusController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses MpmCommandLineWriter::addText()
-	 * @uses MpmCommandLineWriter::write()
+	 * @uses CommandLineWriter::addText()
+	 * @uses CommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = MpmCommandLineWriter::getInstance();
+		$obj = CommandLineWriter::getInstance();
 		$obj->addText('./migrate.php status');
 		$obj->addText(' ');
 		$obj->addText('This command is used to display the current migration you are on and lists any pending migrations which would be performed if you migrated to the most recent version of the database.');

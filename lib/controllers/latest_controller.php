@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmLatestController class.
+ * This file houses the LatestController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -9,18 +10,18 @@
  */
 
 /**
- * The MpmLatestController is used to migrate up to the latest version.
+ * The LatestController is used to migrate up to the latest version.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class MpmLatestController extends MpmController
+class LatestController extends Controller
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmLatestController::dissplayHelp()
+	 * @uses LatestController::dissplayHelp()
 	 * 
 	 * @return void
 	 */
@@ -38,13 +39,13 @@ class MpmLatestController extends MpmController
 		
 		try
 		{
-			$pdo = MpmDb::getPdo();
+			$pdo = Db::getPdo();
     	    // Resolution to Issue #1 - PDO::rowCount is not reliable
 			$sql = "SELECT COUNT(id) FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
 			$stmt = $pdo->query($sql);
 			if ($stmt->fetchColumn() == 0)
 			{
-				$clw = MpmCommandLineWriter::getInstance();
+				$clw = CommandLineWriter::getInstance();
 				$clw->addText('No migrations exist.');
 				$clw->write();
 				exit;
@@ -54,7 +55,7 @@ class MpmLatestController extends MpmController
 			$stmt = $pdo->query($sql);
 			$result = $stmt->fetch(PDO::FETCH_OBJ);
 			$to_id = $result->id;
-			$obj = new MpmUpController('up', array ( $to_id, $forced ));
+			$obj = new UpController('up', array ( $to_id, $forced ));
 			$obj->doAction();
 		}
 		catch (Exception $e)
@@ -67,14 +68,14 @@ class MpmLatestController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses MpmCommandLineWriter::addText()
-	 * @uses MpmCommandLineWriter::write()
+	 * @uses CommandLineWriter::addText()
+	 * @uses CommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = MpmCommandLineWriter::getInstance();
+		$obj = CommandLineWriter::getInstance();
 		$obj->addText('./migrate.php latest [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate up to the most recent version.  No arguments are required.');

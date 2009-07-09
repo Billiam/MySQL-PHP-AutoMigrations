@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmControllerFactory class.
+ * This file houses the ControllerFactory class.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
@@ -9,18 +10,18 @@
  */
 
 /**
- * The MpmControllerFactory reads the command line arguments, determines which controller is needed, and returns that controlller object.
+ * The ControllerFactory reads the command line arguments, determines which controller is needed, and returns that controlller object.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
  */
-class MpmControllerFactory
+class ControllerFactory
 {
 	
 	/**
 	 * Given an array of command line arguments ($argv), determines the controller needed and returns that object.
 	 *
-	 * @return MpmController
+	 * @return Controller
 	 */
 	static public function getInstance($argv)
 	{
@@ -30,7 +31,7 @@ class MpmControllerFactory
 		{
 			$controller_name = 'help';
 		}
-		$class_name = ucwords(MpmStringHelper::strToCamel('mpm_' . strtolower($controller_name) . '_controller'));
+		$class_name = __NAMESPACE__ . '\\' . ucwords(MpmStringHelper::strToCamel(strtolower($controller_name) . '_controller'));
 		$obj = new $class_name($controller_name, $argv);
 		return $obj;
 	}

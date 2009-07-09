@@ -1,6 +1,7 @@
 <?php
+namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MpmCommandLineWriter class.
+ * This file houses the CommandLineWriter class.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
@@ -9,17 +10,17 @@
  */
 
 /**
- * The MpmCommandLineWriter is a Singleton class used to display output to the terminal.
+ * The CommandLineWriter is a Singleton class used to display output to the terminal.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
  */
-class MpmCommandLineWriter
+class CommandLineWriter
 {
 	/**
 	 * A single, static instance of this class.  Singleton pattern.
 	 *
-	 * @var MpmCommandLineWriter
+	 * @var CommandLineWriter
 	 */
 	static private $instance;
 	
@@ -40,7 +41,7 @@ class MpmCommandLineWriter
 	/**
 	 * Object constructor.
 	 *
-	 * @return MpmCommandLineWriter
+	 * @return CommandLineWriter
 	 */
 	private function __construct()
 	{
@@ -51,13 +52,13 @@ class MpmCommandLineWriter
     /**
      * Returns a single static instance of this object.
      *
-	 * @return MpmCommandLineWriter
+	 * @return CommandLineWriter
      */
     static public function getInstance()
     {
         if (self::$instance == null)
         {
-            self::$instance = new MpmCommandLineWriter();
+            self::$instance = new CommandLineWriter();
         }
         return self::$instance;
     }
