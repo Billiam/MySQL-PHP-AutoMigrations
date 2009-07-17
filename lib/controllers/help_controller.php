@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the HelpController class.
+ * This file houses the MpmHelpController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,18 +9,18 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The HelpController is used to display help about the commands available as well as more specific help for individual commands.
+ * The MpmHelpController is used to display help about the commands available as well as more specific help for individual commands.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class HelpController extends Controller
+class MpmHelpController extends MpmController
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses HelpController::displayHelp()
+	 * @uses MpmHelpController::displayHelp()
 	 * 
 	 * @return void
 	 */
@@ -34,7 +33,7 @@ class HelpController extends Controller
 		else
 		{
 			$controller_name = $this->arguments[0];
-			$class_name = __NAMESPACE__ . ucwords(MpmStringHelper::strToCamel(strtolower($controller_name) . '_controller'));
+			$class_name = ucwords(MpmStringHelper::strToCamel('mpm_' . strtolower($controller_name) . '_controller'));
 			try
 			{
 				MpmAutoloadHelper::load($class_name);
@@ -51,14 +50,14 @@ class HelpController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('The Following Commands Are Available:');
 		$obj->addText('add    - add a new migration', 4);
 		$obj->addText('down   - roll down to a previous migration', 4);

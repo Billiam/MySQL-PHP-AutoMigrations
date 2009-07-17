@@ -1,5 +1,4 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
  * This file houses the MpmAutoloadHelper class.
  *
@@ -23,7 +22,7 @@ class MpmAutoloadHelper
 	 *
 	 * @uses MPM_PATH
 	 *
-	 * @throws ClassUndefinedException
+	 * @throws MpmClassUndefinedException
 	 *
 	 * @param string $class_name the name of the class being instantiated
 	 *
@@ -36,13 +35,17 @@ class MpmAutoloadHelper
         {
 			return;
 		}
-			
+		
         // where do we store the classes?
         $class_path = MPM_PATH . '/lib';
-        
+
         // class name is coming to us in camel caps with (possibly) an Mpm prefix... remove prefix and turn into lowercase string with underscores
-        $filename = str_replace(__NAMESPACE__ . '\\', '', $class_name);
-        $filename = MpmStringHelper::camelToLower($filename) . '.php';
+        $filename = MpmStringHelper::camelToLower($class_name);
+        if (substr($filename, 0, 4) == 'mpm_')
+        {
+            $filename = substr($filename, 4, strlen($filename));
+        }
+        $filename .= '.php';
         
         // is it in the class path?
         if (file_exists($class_path . '/' . $filename))
@@ -74,7 +77,7 @@ class MpmAutoloadHelper
         {
             if (false === interface_exists($class_name, false))
             {
-                throw new ClassUndefinedException('Class or interface "' . $class_name . '" does not exist.', E_USER_ERROR);
+                throw new MpmClassUndefinedException('Class or interface "' . $class_name . '" does not exist.', E_USER_ERROR);
             }
         }
         return;

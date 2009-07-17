@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the AddController class.
+ * This file houses the MpmAddController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,18 +9,18 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The AddController is used to create a new migration script.
+ * The MpmAddController is used to create a new migration script.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class AddController extends Controller
+class MpmAddController extends MpmController
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses UpController::displayHelp()
+	 * @uses MpmUpController::displayHelp()
 	 * 
 	 * @return void
 	 */
@@ -41,15 +40,14 @@ class AddController extends Controller
 		// if filename is taken, throw error
 		if (in_array($filename, $files))
 		{
-			$obj = CommandLineWriter::getInstance();
+			$obj = MpmCommandLineWriter::getInstance();
 			$obj->addText('Unable to obtain a unique filename for your migration.  Please try again in a few seconds.');
 			$obj->write();
 		}
 		
 		// create file
-		$file = "<?php\n";
-		$file .= "namespace ReflexSolutions\\MysqlPhpMigrations;\n\n";
-		$file .= 'class ' . $classname . ' extends Migration' . "\n";
+		$file = "<?php\n\n";
+		$file .= 'class ' . $classname . ' extends MpmMigration' . "\n";
 		$file .= "{\n\n";
 		$file .= "\t" . 'public function up(PDO &$pdo)' . "\n";
 		$file .= "\t{\n\t\t\n";
@@ -63,20 +61,20 @@ class AddController extends Controller
 		$fp = fopen(MPM_DB_PATH . $filename, "w");
 		if ($fp == false)
 		{
-			$obj = CommandLineWriter::getInstance();
+			$obj = MpmCommandLineWriter::getInstance();
 			$obj->addText('Unable to write new migration file.');
 			$obj->write();
 		}
 		$success = fwrite($fp, $file);
 		if ($success == false)
 		{
-			$obj = CommandLineWriter::getInstance();
+			$obj = MpmCommandLineWriter::getInstance();
 			$obj->addText('Unable to write new migration file.');
 			$obj->write();
 		}
 		fclose($fp);
 		
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('New migration created: file /db/' . $filename);
 		$obj->write();
 		
@@ -85,14 +83,14 @@ class AddController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('./migrate.php add');
 		$obj->addText(' ');
 		$obj->addText('This command is used to create a new migration script.  The script will be created and prepopulated with the up() and down() methods which you can then modify for the migration.');

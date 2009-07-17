@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the Migration class.
+ * This file houses the MpmMigration class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,12 +9,12 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The Migration is an abstract template class used as the parent to all migration classes.
+ * The MpmMigration is an abstract template class used as the parent to all migration classes.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-abstract class Migration
+abstract class MpmMigration
 {
 	/**
 	 * Migrates the database up.

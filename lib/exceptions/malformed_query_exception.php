@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MalformedQueryException class.
+ * This file houses the MpmMalformedQueryException class.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
@@ -9,15 +8,13 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  * @link       http://code.google.com/p/mysql-php-migrations/
  */
 
-use \Exception;
-
 /**
- * MalformedQueryException should be thrown if MySQL rejects a query.
+ * MpmMalformedQueryException should be thrown if MySQL rejects a query.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
  */
-class MalformedQueryException extends Exception
+class MpmMalformedQueryException extends Exception
 {
 	
 }

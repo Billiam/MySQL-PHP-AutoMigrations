@@ -1,5 +1,4 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
  * This file is included by the migrate.php script; it includes the MpmStringHelper and MpmAutoloadHelper classes and sets up the auto-class loading.
  *
@@ -36,7 +35,7 @@ if (!defined('MPM_DB_PATH'))
 }
 
 /**
- * Include the ClassUndefinedException class.
+ * Include the MpmClassUndefinedException class.
  */
 require_once(MPM_PATH . '/lib/exceptions/class_undefined_exception.php');
 
@@ -57,6 +56,6 @@ if (function_exists('__autoload'))
 }
 
 // add custom library autoloader to the stack
-spl_autoload_register('\ReflexSolutions\MysqlPhpMigrations\MpmAutoloadHelper::load');
+spl_autoload_register('MpmAutoloadHelper::load');
 
 ?>

@@ -1,8 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
-
 /**
- * This file houses the ClassUndefinedException class.
+ * This file houses the MpmClassUndefinedException class.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
@@ -10,15 +8,13 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  * @link       http://code.google.com/p/mysql-php-migrations/
  */
 
-use \Exception;
-
 /**
- * ClassUndefinedException should be thrown when a class is being instantiated but it is not yet defined.
+ * MpmClassUndefinedException should be thrown when a class is being instantiated but it is not yet defined.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
  */
-class ClassUndefinedException extends Exception
+class MpmClassUndefinedException extends Exception
 {
 	
 }

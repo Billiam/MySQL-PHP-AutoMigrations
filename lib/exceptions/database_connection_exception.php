@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the DatabaseConnectionException class.
+ * This file houses the MpmDatabaseConnectionException class.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
@@ -9,15 +8,13 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  * @link       http://code.google.com/p/mysql-php-migrations/
  */
 
-use \Exception;
-
 /**
- * DatabaseConnectionException should be thrown if we can't connect to the database.
+ * MpmDatabaseConnectionException should be thrown if we can't connect to the database.
  *
  * @package    mysql_php_migrations
  * @subpackage Exceptions
  */
-class DatabaseConnectionException extends Exception
+class MpmDatabaseConnectionException extends Exception
 {
 	
 }

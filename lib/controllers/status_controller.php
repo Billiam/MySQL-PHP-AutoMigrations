@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the StatusController class.
+ * This file houses the MpmStatusController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,12 +9,12 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The StatusController is used to display the latest migration.
+ * The MpmStatusController is used to display the latest migration.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class StatusController extends Controller
+class MpmStatusController extends MpmController
 {
 	
 	/**
@@ -29,19 +28,19 @@ class StatusController extends Controller
 		$this->checkIfReady();
 		
 		// need a pdo object
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 		
 		// get latest timestamp
-		$latest = MigrationHelper::getCurrentMigrationTimestamp();
+		$latest = MpmMigrationHelper::getCurrentMigrationTimestamp();
 		
 		// get latest number
-		$num = MigrationHelper::getCurrentMigrationNumber();
+		$num = MpmMigrationHelper::getCurrentMigrationNumber();
 		
 		// get list of migrations
 		$list = MpmListHelper::getFullList();
 		
 		// get command line writer
-		$clw = CommandLineWriter::getInstance();
+		$clw = MpmCommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
 		if (empty($latest))
@@ -59,14 +58,14 @@ class StatusController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('./migrate.php status');
 		$obj->addText(' ');
 		$obj->addText('This command is used to display the current migration you are on and lists any pending migrations which would be performed if you migrated to the most recent version of the database.');

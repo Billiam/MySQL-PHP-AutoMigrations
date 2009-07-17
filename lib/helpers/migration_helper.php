@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the MigrationHelper class.
+ * This file houses the MpmMigrationHelper class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,17 +9,17 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The MigrationHelper contains a number of static functions which are used during the migration process.
+ * The MpmMigrationHelper contains a number of static functions which are used during the migration process.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class MigrationHelper
+class MpmMigrationHelper
 {
     
     static public function setCurrentMigration($id)
     {
-	    $pdo = Db::getPdo();
+	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
 		try
 		{
@@ -63,7 +62,7 @@ class MigrationHelper
 	    
 	    // file exists -- run the migration
 		echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
-	    $pdo = Db::getPdo();
+	    $pdo = MpmDb::getPdo();
 		$pdo->beginTransaction();
 		require_once(MPM_DB_PATH . $filename);
 		$migration = new $classname();
@@ -86,7 +85,7 @@ class MigrationHelper
 			$pdo->rollback();
 			echo "failed!";
 			echo "\n";
-		    $clw = CommandLineWriter::getInstance();
+		    $clw = MpmCommandLineWriter::getInstance();
     		$clw->writeLine($e->getMessage(), 12);
 			if (!$forced)
 			{
@@ -111,7 +110,7 @@ class MigrationHelper
 	{
 	    // Resolution to Issue #1 - PDO::rowCount is not reliable
 	    $sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `is_current` = 1";
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 		$stmt = $pdo->query($sql);
 		if ($stmt->fetchColumn() == 0)
 		{
@@ -135,9 +134,9 @@ class MigrationHelper
 	 */
 	static public function getListOfMigrations($toId, $direction = 'up')
 	{
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 	    $list = array();
-	    $timestamp = MigrationHelper::getTimestampFromId($toId);
+	    $timestamp = MpmMigrationHelper::getTimestampFromId($toId);
 	    if ($direction == 'up')
 	    {
 	        $sql = "SELECT `id`, `timestamp` FROM `mpm_migrations` WHERE `active` = 0 AND `timestamp` <= '$timestamp' ORDER BY `timestamp`";
@@ -171,7 +170,7 @@ class MigrationHelper
      */
     static public function getTimestampFromId($id)
     {
-	    $pdo = Db::getPdo();
+	    $pdo = MpmDb::getPdo();
 	    try
 	    {
     	    // Resolution to Issue #1 - PDO::rowCount is not reliable
@@ -205,7 +204,7 @@ class MigrationHelper
 	 */
 	static public function getCurrentMigrationNumber()
 	{
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 	    // Resolution to Issue #1 - PDO::rowCount is not reliable
 	    $sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `is_current` = 1";
 		$stmt = $pdo->query($sql);

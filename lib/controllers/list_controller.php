@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the ListController class.
+ * This file houses the MpmListController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,18 +9,18 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The ListController is used to display a list of the migrations.
+ * The MpmListController is used to display a list of the migrations.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class ListController extends Controller
+class MpmListController extends MpmController
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses ListController::displayHelp()
+	 * @uses MpmListController::displayHelp()
 	 * 
 	 * @return void
 	 */
@@ -52,7 +51,7 @@ class ListController extends Controller
 		$list = MpmListHelper::getFullList($start_idx);
 		$total = MpmListHelper::getTotalMigrations();
 		$total_pages = ceil($total / $per_page);
-		$clw = CommandLineWriter::getInstance();
+		$clw = MpmCommandLineWriter::getInstance();
 		
 		if ($total == 0)
 		{
@@ -85,14 +84,14 @@ class ListController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('./migrate.php list [page] [per page]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to display a list of all the migrations available.  Each migration is listed by number and timestamp.  You will need the migration number in order to perform an up or down migration.');

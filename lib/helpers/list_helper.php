@@ -1,5 +1,4 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
  * This file houses the MpmListHelper class.
  *
@@ -28,7 +27,7 @@ class MpmListHelper
         try
         {
             $sql = "SELECT COUNT(*) AS total FROM `mpm_migrations`";
-            $pdo = Db::getPdo();
+            $pdo = MpmDb::getPdo();
             $stmt = $pdo->query($sql);
             $obj = $stmt->fetch(PDO::FETCH_OBJ);
         }
@@ -55,7 +54,7 @@ class MpmListHelper
         {
             $sql .= " LIMIT $startIdx,$total";
         }
-        $pdo = Db::getPdo();
+        $pdo = MpmDb::getPdo();
         try
         {
             $stmt = $pdo->query($sql);
@@ -79,7 +78,7 @@ class MpmListHelper
      */
     static function mergeFilesWithDb()
     {
-        $pdo = Db::getPdo();
+        $pdo = MpmDb::getPdo();
         $pdo->beginTransaction();
         // add any new files to the database
         try
@@ -202,7 +201,7 @@ class MpmListHelper
 	 */
 	static public function getListFromDb($latestTimestamp, $direction = 'up')
 	{
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 		$list = array();
 		try
 		{

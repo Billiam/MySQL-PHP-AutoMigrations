@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the UpController class.
+ * This file houses the MpmUpController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,27 +9,27 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The UpController is used to migrate up to a new version.
+ * The MpmUpController is used to migrate up to a new version.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class UpController extends Controller
+class MpmUpController extends MpmController
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses UpController::displayHelp()
+	 * @uses MpmUpController::displayHelp()
 	 * 
 	 * @return void
 	 */
 	public function doAction()
 	{
-		$clw = CommandLineWriter::getInstance();
+		$clw = MpmCommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 		
 		if (count($this->arguments) == 0)
 		{
@@ -52,7 +51,7 @@ class UpController extends Controller
 		}
 
         // what migrations need to be done?
-        $list = MigrationHelper::getListOfMigrations($up_to);
+        $list = MpmMigrationHelper::getListOfMigrations($up_to);
         
 		if (count($list) == 0)
 		{
@@ -61,16 +60,16 @@ class UpController extends Controller
 		    exit;
 		}
 		
-		$to = MigrationHelper::getTimestampFromId($up_to);
+		$to = MpmMigrationHelper::getTimestampFromId($up_to);
 		
 		echo "Migrating to " . $to . ' (ID '.$up_to.')... ';
 		
 		foreach ($list as $id => $obj)
 		{
-		    MigrationHelper::runMigration($obj, 'up', $forced);
+		    MpmMigrationHelper::runMigration($obj, 'up', $forced);
 		}
 		
-		MigrationHelper::setCurrentMigration($up_to);
+		MpmMigrationHelper::setCurrentMigration($up_to);
 		
 		$clw->writeFooter();
 	}
@@ -78,14 +77,14 @@ class UpController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('./migrate.php up [migration #] [--force]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to migrate up to a newer version.  You can get a list of all of the migrations available by using the list command.');

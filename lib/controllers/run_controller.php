@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the RunController class.
+ * This file houses the MpmRunController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
@@ -10,18 +9,18 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The RunController is used to run a single migration.
+ * The MpmRunController is used to run a single migration.
  *
  * @package    mysql_php_migrations
  * @subpackage Controllers
  */
-class RunController extends Controller
+class MpmRunController extends MpmController
 {
 	
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses UpController::displayHelp()
+	 * @uses MpmUpController::displayHelp()
 	 * 
 	 * @return void
 	 */
@@ -32,7 +31,7 @@ class RunController extends Controller
 
         if (count($this->arguments) != 2)
         {
-    		$obj = CommandLineWriter::getInstance();
+    		$obj = MpmCommandLineWriter::getInstance();
     		$obj->addText('ERROR: You must provide two arguments with this command.');
     		$obj->addText(' ');
     		$this->displayHelp();
@@ -47,7 +46,7 @@ class RunController extends Controller
 		
 		if (!is_numeric($num))
 		{
-    		$obj = CommandLineWriter::getInstance();
+    		$obj = MpmCommandLineWriter::getInstance();
     		$obj->addText('ERROR: Migration number must be numeric.');
     		$obj->addText(' ');
     		$this->displayHelp();
@@ -56,7 +55,7 @@ class RunController extends Controller
 		
 		if ($type != 'up' && $type != 'down')
 		{
-    		$obj = CommandLineWriter::getInstance();
+    		$obj = MpmCommandLineWriter::getInstance();
     		$obj->addText('ERROR: Method must be either up or down.');
     		$obj->addText(' ');
     		$this->displayHelp();
@@ -66,7 +65,7 @@ class RunController extends Controller
 		// does this migration number exist?
 		try
 		{
-    		$pdo = Db::getPdo();
+    		$pdo = MpmDb::getPdo();
 		    // Resolution to Issue #1 - PDO::rowCount is not reliable
     		$sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `id` = '$num'";
     		$stmt = $pdo->query($sql);
@@ -79,7 +78,7 @@ class RunController extends Controller
 
 		if ($stmt->fetchColumn() != 1)
 		{
-    		$obj = CommandLineWriter::getInstance();
+    		$obj = MpmCommandLineWriter::getInstance();
     		$obj->addText('ERROR: Migration ' . $num . ' does not exist.');
     		$obj->write();
     		return;
@@ -89,9 +88,9 @@ class RunController extends Controller
 		unset($stmt);
 		$stmt = $pdo->query($sql);
 		$row = $stmt->fetch(PDO::FETCH_OBJ);
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->writeHeader();
-		MigrationHelper::runMigration($row, $type);
+		MpmMigrationHelper::runMigration($row, $type);
 		echo "\n";
 		$obj->writeFooter();
 		
@@ -100,14 +99,14 @@ class RunController extends Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter::addText()
-	 * @uses CommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
 	public function displayHelp()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('./migrate.php run [method] [migration #]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to run a single migration.');

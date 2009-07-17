@@ -1,7 +1,6 @@
 <?php
-namespace ReflexSolutions\MysqlPhpMigrations;
 /**
- * This file houses the Controller class.
+ * This file houses the MpmController class.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
@@ -10,16 +9,16 @@ namespace ReflexSolutions\MysqlPhpMigrations;
  */
 
 /**
- * The Controller is the abstract parent class to all other controllers.
+ * The MpmController is the abstract parent class to all other controllers.
  *
  * @package    mysql_php_migrations
  * @subpackage Classes
  */
-abstract class Controller
+abstract class MpmController
 {
 
 	/**
-	 * An array of command line arguments (minus the first two elements which should already be shifted off from the ControllerFactory).
+	 * An array of command line arguments (minus the first two elements which should already be shifted off from the MpmControllerFactory).
 	 *
 	 * @var array
 	 */
@@ -35,9 +34,9 @@ abstract class Controller
 	/** 
 	 * Object constructor.
 	 * 
-	 * @param array $arguments an array of command line arguments (minus the first two elements which should already be shifted off from the ControllerFactory)
+	 * @param array $arguments an array of command line arguments (minus the first two elements which should already be shifted off from the MpmControllerFactory)
 	 *
-	 * @return Controller
+	 * @return MpmController
 	 */
 	public function __construct($command = 'help', $arguments = array())
 	{
@@ -60,7 +59,7 @@ abstract class Controller
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses CommandLineWriter
+	 * @uses MpmCommandLineWriter
 	 * 
 	 * @return void
 	 */
@@ -75,7 +74,7 @@ abstract class Controller
 	 */
 	protected function checkIfReady()
 	{
-		$obj = CommandLineWriter::getInstance();
+		$obj = MpmCommandLineWriter::getInstance();
 		// PDO available?
 		if (!class_exists('PDO'))
 		{
@@ -117,7 +116,7 @@ abstract class Controller
 	{
 	    try
 	    {
-    		$pdo = Db::getPdo();
+    		$pdo = MpmDb::getPdo();
 	    }
 	    catch (Exception $e)
 	    {
@@ -134,7 +133,7 @@ abstract class Controller
 	protected function checkForDbTable()
 	{
 		$tables = array();
-		$pdo = Db::getPdo();
+		$pdo = MpmDb::getPdo();
 		$sql = "SHOW TABLES";
 	    try
 	    {
