@@ -75,18 +75,35 @@ abstract class MpmController
 	protected function checkIfReady()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		// PDO available?
-		if (!class_exists('PDO'))
-		{
-			$msg = 'It does not appear that the PDO extension is installed.  This script requires this extension.';
-			$obj->addText($msg);
-			$obj->write();
-			exit;
-		}
+		
 		// does db.php exist?
 		if (!file_exists(MPM_PATH . '/config/db_config.php'))
 		{
 			$msg = 'You have not yet run the init command.  You must run this command before you can use any other commands.';
+			$obj->addText($msg);
+			$obj->write();
+			exit;
+		}
+		// PDO available or mysqli available?
+		if (!class_exists('PDO') && !class_exists('mysqli'))
+		{
+			$msg = 'It does not appear that the PDO and mysqli extensions are installed.  This script requires at least one of these extensions.';
+			$obj->addText($msg);
+			$obj->write();
+			exit;
+		}
+		// check for specific extension
+		$db_config = $GLOBALS['db_config'];
+		if ($db_config->method == MPM_METHOD_PDO && !class_exists('PDO'))
+		{
+			$msg = 'It does not appear that the PDO extension is installed.  Re-run the init command and select mysqli instead.';
+			$obj->addText($msg);
+			$obj->write();
+			exit;
+		}
+		if ($db_config->method == MPM_METHOD_MYSQLI && !class_exists('mysqli'))
+		{
+			$msg = 'It does not appear that the mysqli extension is installed.  Re-run the init command and select PDO instead.';
 			$obj->addText($msg);
 			$obj->write();
 			exit;
@@ -114,14 +131,29 @@ abstract class MpmController
 	 */
 	protected function checkDbConnection()
 	{
-	    try
-	    {
-    		$pdo = MpmDb::getPdo();
-	    }
-	    catch (Exception $e)
-	    {
-	        return false;
-	    }
+		$db_config = $GLOBALS['db_config'];
+		if ($db_config->method == MPM_METHOD_PDO)
+		{
+    	    try
+    	    {
+        		$pdo = MpmDb::getPdo();
+    	    }
+    	    catch (Exception $e)
+    	    {
+    	        return false;
+    	    }
+        }
+        else if ($db_config->method == MPM_METHOD_PDO)
+        {
+    	    try
+    	    {
+        		$mysqli = MpmMysqliHelper::getMysqli();
+    	    }
+    	    catch (Exception $e)
+    	    {
+    	        return false;
+    	    }
+        }
 	    return true;
 	}
 	
@@ -133,19 +165,23 @@ abstract class MpmController
 	protected function checkForDbTable()
 	{
 		$tables = array();
-		$pdo = MpmDb::getPdo();
-		$sql = "SHOW TABLES";
-	    try
-	    {
-    		foreach ($pdo->query($sql) as $row)
-    		{
-    			$tables[] = $row[0];
-    		}
-	    }
-	    catch (Exception $e)
-	    {
-	        return false;
-	    }
+		$db_config = $GLOBALS['db_config'];
+		if ($db_config->method == MPM_METHOD_PDO)
+		{
+    		$pdo = MpmDb::getPdo();
+    		$sql = "SHOW TABLES";
+    	    try
+    	    {
+        		foreach ($pdo->query($sql) as $row)
+        		{
+        			$tables[] = $row[0];
+        		}
+    	    }
+    	    catch (Exception $e)
+    	    {
+    	        return false;
+    	    }
+        }
 		if (count($tables) == 0 || !in_array('mpm_migrations', $tables))
 	    {
 	        return false;

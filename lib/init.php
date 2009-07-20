@@ -34,6 +34,22 @@ if (!defined('MPM_DB_PATH'))
     }
 }
 
+if (!defined('MPM_METHOD_PDO'))
+{
+    /**
+     * Flag to use PDO to talk to the database.
+     */
+    define('MPM_METHOD_PDO', 1);
+}
+
+if (!defined('MPM_METHOD_MYSQLI'))
+{
+    /**
+     * Flag to use MySQLi to talk to the database.
+     */
+    define('MPM_METHOD_MYSQLI', 2);
+}
+
 /**
  * Include the MpmClassUndefinedException class.
  */

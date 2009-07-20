@@ -30,11 +30,12 @@ class MpmInitController extends MpmController
 		$dbname = '';
 		$port = '';
 		$db_path = '';
+		$method = 0;
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
 		{
 			echo "\nWARNING:  IF YOU CONTINUE, YOUR EXISTING MIGRATION SETUP WILL BE ERASED!";
-			echo "\nThis can damage your database, cause conflicts, and create errors!";
+			echo "\nThis will not affect your existing migrations or database, but \ncould cause your future migrations to fail.";
 			echo "\nDO YOU WANT TO CONTINUE? [y/N] ";
 			$answer = fgets(STDIN);
 			$answer = trim($answer);
@@ -46,6 +47,17 @@ class MpmInitController extends MpmController
 			}
 		}
 		
+		do 
+		{
+			echo "\nWhich method would you like to use to connect to the database?  ".MPM_METHOD_PDO."=PDO or ".MPM_METHOD_MYSQLI."=MySQLi: ";
+			$method = fgets(STDIN);
+			$method = trim($method);
+			if (!is_numeric($method))
+			{
+			    $method = 0;
+			}
+		} while ($method < MPM_METHOD_PDO || $method > MPM_METHOD_MYSQLI || $method == 0);
+
 		echo "\nEnter your MySQL database hostname or IP address [localhost]: ";
 		$host = fgets(STDIN);
 		$host = trim($host);
@@ -99,6 +111,8 @@ class MpmInitController extends MpmController
 		    $db_path .= '/';
 		}
 		
+		$method = (int) $method;
+		
 		$file = '<?php' . "\n\n";
 		$file .= '$db_config = (object) array();' . "\n";
 		$file .= '$db_config->host = ' . "'" . $host . "';" . "\n";
@@ -107,6 +121,7 @@ class MpmInitController extends MpmController
 		$file .= '$db_config->pass = ' . "'" . $pass . "';" . "\n";
 		$file .= '$db_config->name = ' . "'" . $dbname . "';" . "\n";
         $file .= '$db_config->db_path = ' . "'" . $db_path . "';" . "\n";
+        $file .= '$db_config->method = ' . $method . ";" . "\n";
 		$file .= "\n?>";
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
@@ -141,21 +156,25 @@ class MpmInitController extends MpmController
 				echo "Creating migrations table... ";
 				$sql1 = "CREATE TABLE IF NOT EXISTS `mpm_migrations` ( `id` INT(11) NOT NULL AUTO_INCREMENT, `timestamp` DATETIME NOT NULL, `active` TINYINT(1) NOT NULL DEFAULT 0, `is_current` TINYINT(1) NOT NULL DEFAULT 0, PRIMARY KEY ( `id` ) ) ENGINE=InnoDB";
 				$sql2 = "CREATE UNIQUE INDEX `TIMESTAMP_INDEX` ON `mpm_migrations` ( `timestamp` )";
-				$pdo = MpmDb::getPdo();
-				$pdo->beginTransaction();
-				try
+				
+				if ($db_config->method == MPM_METHOD_PDO)
 				{
-					$pdo->exec($sql1);
-					$pdo->exec($sql2);
-				}
-				catch (Exception $e)
-				{
-					$pdo->rollback();
-					echo "failure!\n\n" . 'Unable to create required mpm_migrations table:' . $e->getMessage();
-					echo "\n\n";
-					exit;
-				}
-				$pdo->commit();
+    				$pdo = MpmDb::getPdo();
+    				$pdo->beginTransaction();
+    				try
+    				{
+    					$pdo->exec($sql1);
+    					$pdo->exec($sql2);
+    				}
+    				catch (Exception $e)
+    				{
+    					$pdo->rollback();
+    					echo "failure!\n\n" . 'Unable to create required mpm_migrations table:' . $e->getMessage();
+    					echo "\n\n";
+    					exit;
+    				}
+    				$pdo->commit();
+			    }
 				echo "done.\n\n";
 			}
 			else

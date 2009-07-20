@@ -59,7 +59,7 @@ class MpmDb
 		}
 		return $db->dbh;
 	}
-	
+		
 }
 
 ?>
