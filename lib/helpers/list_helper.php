@@ -24,18 +24,34 @@ class MpmListHelper
      */
     static function getTotalMigrations()
     {
-        try
+        $db_config = $GLOBALS['db_config'];
+        $sql = "SELECT COUNT(*) AS total FROM `mpm_migrations`";
+        if ($db_config->method == MPM_METHOD_PDO)
         {
-            $sql = "SELECT COUNT(*) AS total FROM `mpm_migrations`";
-            $pdo = MpmDb::getPdo();
-            $stmt = $pdo->query($sql);
-            $obj = $stmt->fetch(PDO::FETCH_OBJ);
+            try
+            {
+                $pdo = MpmDb::getPdo();
+                $stmt = $pdo->query($sql);
+                $obj = $stmt->fetch(PDO::FETCH_OBJ);
+            }
+            catch (Exception $e)
+            {
+                echo "\n\nError: " . $e->getMessage();
+            }
+            return $obj->total;
         }
-        catch (Exception $e)
+        else
         {
-            echo "\n\nError: " . $e->getMessage();
+            try
+            {
+                $mysqli = MpmMysqliHelper::getMysqli();
+                
+            }
+            catch (Exception $e)
+            {
+                echo "\n\nError: " . $e->getMessage();
+            }
         }
-        return $obj->total;
     }
     
     /**
