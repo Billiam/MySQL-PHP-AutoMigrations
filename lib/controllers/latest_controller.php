@@ -20,7 +20,8 @@ class MpmLatestController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmLatestController::dissplayHelp()
+	 * @uses MpmLatestController::displayHelp()
+	 * @uses MpmMigrationsHelper::getTotalMigrations()
 	 * 
 	 * @return void
 	 */
@@ -38,11 +39,8 @@ class MpmLatestController extends MpmController
 		
 		try
 		{
-			$pdo = MpmDb::getPdo();
-    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
-			$sql = "SELECT COUNT(id) FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
-			$stmt = $pdo->query($sql);
-			if ($stmt->fetchColumn() == 0)
+			$total_migrations = MpmMigrationsHelper::getTotalMigrations();
+			if ($total_migrations == 0)
 			{
 				$clw = MpmCommandLineWriter::getInstance();
 				$clw->addText('No migrations exist.');

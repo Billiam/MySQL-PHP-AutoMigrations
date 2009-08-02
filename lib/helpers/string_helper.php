@@ -26,7 +26,8 @@ class MpmStringHelper
      */
     static public function getTimestampFromFilename($file)
     {
-		$time = substr($file, 0, strlen($file) - 4);
+		// strip .php
+		$time = str_replace('.php', '', $file);
 		$t = explode('_', $time);
 		// Fix for problem when file doesn't exist and comes in as an empty string, then throws undefined offset errors
 		if (count($t) != 6)
@@ -34,6 +35,16 @@ class MpmStringHelper
 		    return null;
 		}
 		$timestamp = $t[0] . '-' . $t[1] . '-' . $t[2] . 'T' . $t[3] . ':' . $t[4] . ':' . $t[5];
+		// validate the date
+		if (false === checkdate($t[1], $t[2], $t[0]))
+		{
+			return null;
+		}
+		// validate timestamp
+		if (false === strtotime($timestamp))
+		{
+			return null;
+		}
 		return $timestamp;
     }
     

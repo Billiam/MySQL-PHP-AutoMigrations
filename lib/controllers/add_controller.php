@@ -46,17 +46,35 @@ class MpmAddController extends MpmController
 		}
 		
 		// create file
-		$file = "<?php\n\n";
-		$file .= 'class ' . $classname . ' extends MpmMigration' . "\n";
-		$file .= "{\n\n";
-		$file .= "\t" . 'public function up(PDO &$pdo)' . "\n";
-		$file .= "\t{\n\t\t\n";
-		$file .= "\t}\n\n";
-		$file .= "\t" . 'public function down(PDO &$pdo)' . "\n";
-		$file .= "\t{\n\t\t\n";
-		$file .= "\t}\n\n";
-		$file .= "}\n\n";
-		$file .= "?>";
+		$db_config = $GLOBALS['db_config'];
+		if ($db_config->method == MPM_METHOD_PDO)
+		{
+			$file = "<?php\n\n";
+			$file .= 'class ' . $classname . ' extends MpmMigration' . "\n";
+			$file .= "{\n\n";
+			$file .= "\t" . 'public function up(PDO &$pdo)' . "\n";
+			$file .= "\t{\n\t\t\n";
+			$file .= "\t}\n\n";
+			$file .= "\t" . 'public function down(PDO &$pdo)' . "\n";
+			$file .= "\t{\n\t\t\n";
+			$file .= "\t}\n\n";
+			$file .= "}\n\n";
+			$file .= "?>";
+		}
+		else
+		{
+			$file = "<?php\n\n";
+			$file .= 'class ' . $classname . ' extends MpmMysqliMigration' . "\n";
+			$file .= "{\n\n";
+			$file .= "\t" . 'public function up(mysqli &$pdo)' . "\n";
+			$file .= "\t{\n\t\t\n";
+			$file .= "\t}\n\n";
+			$file .= "\t" . 'public function down(mysqli &$pdo)' . "\n";
+			$file .= "\t{\n\t\t\n";
+			$file .= "\t}\n\n";
+			$file .= "}\n\n";
+			$file .= "?>";
+		}
 		
 		$fp = fopen(MPM_DB_PATH . $filename, "w");
 		if ($fp == false)

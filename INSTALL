@@ -4,7 +4,7 @@ REQUIREMENTS:
 
 1) PHP 5.2.6+ (w/ CLI)
 
-2) PDO_MySQL extension for PHP
+2) PDO_MySQL or MySQLi extension for PHP
 
 3) MySQL 4.1+
 

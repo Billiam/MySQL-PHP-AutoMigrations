@@ -143,7 +143,7 @@ abstract class MpmController
     	        return false;
     	    }
         }
-        else if ($db_config->method == MPM_METHOD_PDO)
+        else if ($db_config->method == MPM_METHOD_MYSQLI)
         {
     	    try
     	    {
@@ -182,6 +182,22 @@ abstract class MpmController
     	        return false;
     	    }
         }
+		else
+		{
+			$mysqli = MpmMysqliHelper::getMysqli();
+			try
+			{
+				$result = $mysqli->query('SHOW TABLES');
+				while ($row = $result->fetch_array())
+				{
+					$tables[] = $row[0];
+				}				
+			}
+			catch (Exception $e)
+			{
+				return false;
+			}
+		}
 		if (count($tables) == 0 || !in_array('mpm_migrations', $tables))
 	    {
 	        return false;

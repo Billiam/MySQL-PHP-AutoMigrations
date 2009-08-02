@@ -220,6 +220,39 @@ class MpmMigrationHelper
 		return $latest;
 	}
 	
+	/**
+	 * Returns the total number of migrations.
+	 *
+	 * @uses MpmDb::getPdo() 
+	 *
+	 * @return int
+	 */
+	static public function getMigrationCount()
+	{
+		$db_config = $GLOBALS['db_config'];
+		if ($db_config->method == MPM_METHOD_PDO)
+		{
+			$pdo = MpmDb::getPdo();
+    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
+			$sql = "SELECT COUNT(id) FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
+			$stmt = $pdo->query($sql);
+			return $stmt->fetchColumn();
+		}
+	}
+	
+	/**
+	 * Returns the ID of the most recent migration in the system.  This is primarily used to migrate up to the latest migration.
+	 *
+	 * @uses MpmDb::getPdo()
+	 * @uses MpmMysqliHelper::getMysqli()
+	 *
+	 * @return int
+	 */
+	static public function getMostRecentMigration()
+	{
+		
+	}
+	
 }
 
 ?>
