@@ -150,16 +150,16 @@ class MpmInitController extends MpmController
 		
 		try
 		{
-			if (false === $this->checkForDbTable())
+			if (false === MpmDbHelper::checkForDbTable())
 			{
 				echo "not found.\n";
 				echo "Creating migrations table... ";
 				$sql1 = "CREATE TABLE IF NOT EXISTS `mpm_migrations` ( `id` INT(11) NOT NULL AUTO_INCREMENT, `timestamp` DATETIME NOT NULL, `active` TINYINT(1) NOT NULL DEFAULT 0, `is_current` TINYINT(1) NOT NULL DEFAULT 0, PRIMARY KEY ( `id` ) ) ENGINE=InnoDB";
 				$sql2 = "CREATE UNIQUE INDEX `TIMESTAMP_INDEX` ON `mpm_migrations` ( `timestamp` )";
 				
-				if ($db_config->method == MPM_METHOD_PDO)
+				if (MpmDbHelper::getMethod() == MPM_METHOD_PDO)
 				{
-    				$pdo = MpmDb::getPdo();
+    				$pdo = MpmDbHelper::getDbObj();
     				$pdo->beginTransaction();
     				try
     				{
@@ -174,6 +174,24 @@ class MpmInitController extends MpmController
     					exit;
     				}
     				$pdo->commit();
+			    }
+			    else
+			    {
+			        $mysqli = MpmDbHelper::getDbObj();
+			        $mysqli->query($sql1);
+			        if ($mysqli->errno)
+			        {
+    					echo "failure!\n\n" . 'Unable to create required mpm_migrations table:' . $mysqli->error;
+    					echo "\n\n";
+    					exit;
+			        }
+		            $mysqli->query($sql2);
+			        if ($mysqli->errno)
+			        {
+    					echo "failure!\n\n" . 'Unable to create required mpm_migrations table:' . $mysqli->error;
+    					echo "\n\n";
+    					exit;
+			        }
 			    }
 				echo "done.\n\n";
 			}

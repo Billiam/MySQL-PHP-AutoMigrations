@@ -24,34 +24,9 @@ class MpmListHelper
      */
     static function getTotalMigrations()
     {
-        $db_config = $GLOBALS['db_config'];
         $sql = "SELECT COUNT(*) AS total FROM `mpm_migrations`";
-        if ($db_config->method == MPM_METHOD_PDO)
-        {
-            try
-            {
-                $pdo = MpmDb::getPdo();
-                $stmt = $pdo->query($sql);
-                $obj = $stmt->fetch(PDO::FETCH_OBJ);
-            }
-            catch (Exception $e)
-            {
-                echo "\n\nError: " . $e->getMessage();
-            }
-            return $obj->total;
-        }
-        else
-        {
-            try
-            {
-                $mysqli = MpmMysqliHelper::getMysqli();
-                
-            }
-            catch (Exception $e)
-            {
-                echo "\n\nError: " . $e->getMessage();
-            }
-        }
+        $obj = MpmDbHelper::doSingleRowSelect($sql);
+        return $obj->total;
     }
     
     /**
@@ -70,20 +45,7 @@ class MpmListHelper
         {
             $sql .= " LIMIT $startIdx,$total";
         }
-        $pdo = MpmDb::getPdo();
-        try
-        {
-            $stmt = $pdo->query($sql);
-            while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
-            {
-                $list[] = $obj;
-            }
-        }
-        catch (Exception $e)
-        {
-            echo "\n\nError: " . $e->getMessage() . "\n\n";
-            exit;            
-        }
+        $list = MpmDbHelper::doMultiRowSelect($sql);
         return $list;
     }
     
@@ -94,51 +56,116 @@ class MpmListHelper
      */
     static function mergeFilesWithDb()
     {
-        $pdo = MpmDb::getPdo();
-        $pdo->beginTransaction();
-        // add any new files to the database
-        try
+        $files = MpmListHelper::getListOfFiles();
+        $total_migrations = MpmListHelper::getTotalMigrations();
+        $db_list = MpmListHelper::getFullList(0, $total_migrations);
+        $file_timestamps = MpmListHelper::getTimestampArray($files);
+        if (MpmDbHelper::getMethod() == MPM_METHOD_PDO)
         {
-            $files = MpmListHelper::getListOfFiles();
-            foreach ($files as $file)
+            if (count($files) > 0)
             {
-                $sql = "INSERT IGNORE INTO `mpm_migrations` ( `timestamp`, `active`, `is_current` ) VALUES ( '{$file->timestamp}', 0, 0 )";
-                $pdo->exec($sql);
-            }
-        }
-        catch (Exception $e)
-        {
-            $pdo->rollback();
-            echo "\n\nError: " . $e->getMessage();
-            echo "\n\n";
-            exit;
-        }
-        $pdo->commit();
-        $pdo->beginTransaction();
-        // remove migrations from the database which no longer have a corresponding file and are not active yet
-        try
-        {
-            $total_migrations = MpmListHelper::getTotalMigrations();
-            $db_list = MpmListHelper::getFullList(0, $total_migrations);
-            $files = MpmListHelper::getListOfFiles();
-            $file_timestamps = MpmListHelper::getTimestampArray($files);
-            foreach ($db_list as $obj)
-            {
-                if (!in_array($obj->timestamp, $file_timestamps) && $obj->active == 0)
+                $pdo = MpmDbHelper::getPdoObj();
+                $pdo->beginTransaction();
+                try
                 {
-                    $sql = "DELETE FROM `mpm_migrations` WHERE `id` = '{$obj->id}'";
-                    $pdo->exec($sql);
+                    foreach ($files as $file)
+                    {
+                        $sql = "INSERT IGNORE INTO `mpm_migrations` ( `timestamp`, `active`, `is_current` ) VALUES ( '{$file->timestamp}', 0, 0 )";
+                        $pdo->exec($sql);
+                    }
                 }
+                catch (Exception $e)
+                {
+                    $pdo->rollback();
+                    echo "\n\nError: " . $e->getMessage();
+                    echo "\n\n";
+                    exit;
+                }
+                $pdo->commit();
+            }
+            if (count($db_list))
+            {
+                $pdo->beginTransaction();
+                try
+                {
+                    foreach ($db_list as $obj)
+                    {
+                        if (!in_array($obj->timestamp, $file_timestamps) && $obj->active == 0)
+                        {
+                            $sql = "DELETE FROM `mpm_migrations` WHERE `id` = '{$obj->id}'";
+                            $pdo->exec($sql);
+                        }
+                    }
+                }
+                catch (Exception $e)
+                {
+                    $pdo->rollback();
+                    echo "\n\nError: " . $e->getMessage();
+                    echo "\n\n";
+                    exit;
+                }
+                $pdo->commit();
             }
         }
-        catch (Exception $e)
+        else
         {
-            $pdo->rollback();
-            echo "\n\nError: " . $e->getMessage();
-            echo "\n\n";
-            exit;
+            $mysqli = MpmDbHelper::getMysqliObj();
+            $mysqli->autocommit(false);
+            
+            if (count($files) > 0)
+            {
+                try
+                {
+                    $stmt = $mysqli->prepare('INSERT IGNORE INTO `mpm_migrations` ( `timestamp`, `active`, `is_current` ) VALUES ( ?, 0, 0 )');
+                    foreach ($files as $file)
+                    {
+                        $stmt->bind_param('s', $file->timestamp);
+                        $result = $stmt->execute();
+                        if ($result === false)
+                        {
+                            throw new Exception('Unable to execute query to update file list.');
+                        }
+                    }
+                }
+                catch (Exception $e)
+                {
+                    $mysqli->rollback();
+                    $mysqli->close();
+                    echo "\n\nError:", $e->getMessage(), "\n\n";
+                    exit;
+                }
+                $mysqli->commit();
+            }
+            if (count($db_list))
+            {
+                try
+                {
+                    $stmt = $mysqli->prepare('DELETE FROM `mpm_migrations` WHERE `id` = ?');
+                    foreach ($db_list as $obj)
+                    {
+                        if (!in_array($obj->timestamp, $file_timestamps) && $obj->active == 0)
+                        {
+                            $stmt->bind_param('i', $obj->id);
+                            $result = $stmt->execute();
+                            if ($result === false)
+                            {
+                                throw new Exception('Unable to execute query to remove stale files from the list.');
+                            }
+                        }
+                    }
+                }
+                catch (Exception $e)
+                {
+                    $mysqli->rollback();
+                    $mysqli->close();
+                    echo "\n\nError: " . $e->getMessage();
+                    echo "\n\n";
+                    exit;
+                }
+                $mysqli->commit();
+            }
+            $mysqli->close();
         }
-        $pdo->commit();
     }
     
     /**
@@ -217,38 +244,25 @@ class MpmListHelper
 	 */
 	static public function getListFromDb($latestTimestamp, $direction = 'up')
 	{
-		$pdo = MpmDb::getPdo();
-		$list = array();
-		try
+		if ($direction == 'down')
 		{
-			if ($direction == 'down')
-			{
-				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
-				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
-			}
-			else
-			{
-				$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
-				$countSql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
-			}
-			$stmt = $pdo->query($countSql);
-    	    // Resolution to Issue #1 - PDO::rowCount is not reliable
-			$count = $stmt->fetchColumn();
-			unset($stmt);
-			$stmt = $pdo->query($sql);
-			if ($count > 0)
-			{
-				while ($obj = $stmt->fetch(PDO::FETCH_OBJ))
-				{
-					$list[] = $obj->timestamp;
-				}
-			}
+			$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
+			$countSql = "SELECT COUNT(*) as total FROM `mpm_migrations` WHERE `timestamp` <= '$latestTimestamp' AND `active` = 1";
 		}
-		catch (Exception $e)
+		else
 		{
-			echo "\n\nERROR -- " . $e->getMessage();
-			echo "\n\n";
-			exit;
+			$sql = "SELECT * FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
+			$countSql = "SELECT COUNT(*) as total FROM `mpm_migrations` WHERE `timestamp` >= '$latestTimestamp' AND `active` = 1";
+		}
+		$list = array();
+		$countObj = MpmDbHelper::doSingleRowSelect($countSql);
+		if ($countObj->total > 0)
+		{
+		    $results = MpmDbHelper::doMultiRowSelect($sql);
+		    foreach ($results as $obj)
+		    {
+				$list[] = $obj->timestamp;
+		    }
 		}
 		return $list;
 	}

@@ -27,7 +27,7 @@ class MpmAddController extends MpmController
 	public function doAction()
 	{
 		// make sure system is init'ed
-		$this->checkIfReady();
+		MpmDbHelper::test();
 		
 		// get date stamp for use in generating filename
 		$date_stamp = date('Y_m_d_H_i_s');
@@ -46,8 +46,7 @@ class MpmAddController extends MpmController
 		}
 		
 		// create file
-		$db_config = $GLOBALS['db_config'];
-		if ($db_config->method == MPM_METHOD_PDO)
+		if (MpmDbHelper::getMethod() == MPM_METHOD_PDO)
 		{
 			$file = "<?php\n\n";
 			$file .= 'class ' . $classname . ' extends MpmMigration' . "\n";
@@ -66,10 +65,10 @@ class MpmAddController extends MpmController
 			$file = "<?php\n\n";
 			$file .= 'class ' . $classname . ' extends MpmMysqliMigration' . "\n";
 			$file .= "{\n\n";
-			$file .= "\t" . 'public function up(mysqli &$pdo)' . "\n";
+			$file .= "\t" . 'public function up(ExceptionalMysqli &$mysqli)' . "\n";
 			$file .= "\t{\n\t\t\n";
 			$file .= "\t}\n\n";
-			$file .= "\t" . 'public function down(mysqli &$pdo)' . "\n";
+			$file .= "\t" . 'public function down(ExceptionalMysqli &$mysqli)' . "\n";
 			$file .= "\t{\n\t\t\n";
 			$file .= "\t}\n\n";
 			$file .= "}\n\n";

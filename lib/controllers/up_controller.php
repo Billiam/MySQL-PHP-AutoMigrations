@@ -29,8 +29,6 @@ class MpmUpController extends MpmController
 		$clw = MpmCommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
-		$pdo = MpmDb::getPdo();
-		
 		if (count($this->arguments) == 0)
 		{
 			return $this->displayHelp();

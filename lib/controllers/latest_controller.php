@@ -28,7 +28,7 @@ class MpmLatestController extends MpmController
 	public function doAction()
 	{
 		// make sure we're init'd
-		$this->checkIfReady();
+		MpmDbHelper::test();
 		
 		// are we forcing this?
 		$forced = '';
@@ -39,7 +39,7 @@ class MpmLatestController extends MpmController
 		
 		try
 		{
-			$total_migrations = MpmMigrationsHelper::getTotalMigrations();
+			$total_migrations = MpmMigrationHelper::getMigrationCount();
 			if ($total_migrations == 0)
 			{
 				$clw = MpmCommandLineWriter::getInstance();
@@ -47,13 +47,9 @@ class MpmLatestController extends MpmController
 				$clw->write();
 				exit;
 			}
-			$sql = "SELECT `id` FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
-			unset($stmt);
-			$stmt = $pdo->query($sql);
-			$result = $stmt->fetch(PDO::FETCH_OBJ);
-			$to_id = $result->id;
+			$to_id = MpmMigrationHelper::getLatestMigration();
 			$obj = new MpmUpController('up', array ( $to_id, $forced ));
-			$obj->doAction();
+    		$obj->doAction();
 		}
 		catch (Exception $e)
 		{

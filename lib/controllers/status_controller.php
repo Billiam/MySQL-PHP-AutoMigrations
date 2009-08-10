@@ -25,10 +25,7 @@ class MpmStatusController extends MpmController
 	public function doAction()
 	{
 		// make sure we're init'd
-		$this->checkIfReady();
-		
-		// need a pdo object
-		$pdo = MpmDb::getPdo();
+		MpmDbHelper::test();
 		
 		// get latest timestamp
 		$latest = MpmMigrationHelper::getCurrentMigrationTimestamp();

@@ -71,7 +71,7 @@ class MpmDownController extends MpmController
 		}
 		
 		MpmMigrationHelper::setCurrentMigration($down_to);
-		
+		echo "done.\n\n";
 		$clw->writeFooter();
 	}
 

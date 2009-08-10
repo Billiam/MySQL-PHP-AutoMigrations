@@ -114,6 +114,12 @@ class MpmStringHelper
         $lower = substr($lower, 0, strlen($lower) - 1);
         return $lower;
     }
+    
+    static public function addSingleQuotes($arg) 
+    { 
+      /* single quote and escape single quotes and backslashes */ 
+      return "'" . addcslashes($arg, "'\\") . "'"; 
+    }        
 
 }
 

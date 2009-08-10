@@ -27,7 +27,7 @@ class MpmRunController extends MpmController
 	public function doAction()
 	{
 		// make sure system is init'ed
-		$this->checkIfReady();
+		MpmDbHelper::test();
 
         if (count($this->arguments) != 2)
         {
@@ -63,20 +63,7 @@ class MpmRunController extends MpmController
 		}
 		
 		// does this migration number exist?
-		try
-		{
-    		$pdo = MpmDb::getPdo();
-		    // Resolution to Issue #1 - PDO::rowCount is not reliable
-    		$sql = "SELECT COUNT(*) FROM `mpm_migrations` WHERE `id` = '$num'";
-    		$stmt = $pdo->query($sql);
-	    }
-	    catch (Exception $e)
-	    {
-            echo "\n\nError: " . $e->getMessage() . "\n\n";
-            exit;
-	    }
-
-		if ($stmt->fetchColumn() != 1)
+		if (!MpmMigrationHelper::doesMigrationExist($num))
 		{
     		$obj = MpmCommandLineWriter::getInstance();
     		$obj->addText('ERROR: Migration ' . $num . ' does not exist.');
@@ -84,10 +71,7 @@ class MpmRunController extends MpmController
     		return;
 		}
 		
-		$sql = "SELECT * FROM `mpm_migrations` WHERE `id` = '$num'";
-		unset($stmt);
-		$stmt = $pdo->query($sql);
-		$row = $stmt->fetch(PDO::FETCH_OBJ);
+		$row = MpmMigrationHelper::getMigrationObject($num);
 		$obj = MpmCommandLineWriter::getInstance();
 		$obj->writeHeader();
 		MpmMigrationHelper::runMigration($row, $type);
