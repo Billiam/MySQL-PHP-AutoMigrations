@@ -187,7 +187,7 @@ class MpmMigrationHelper
                     $results = $mysqli->query($sql);
                     while ($row = $results->fetch_object())
                     {
-                        $list[$row->id] = $obj;
+                        $list[$row->id] = $row;
                     }
                 }
                 catch (Exception $e)
@@ -298,11 +298,13 @@ class MpmMigrationHelper
 		            {
 		                return false;
 		            }
-	                $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
-	                $stmt->close();
 	                unset($stmt);
+	                $stmt->close();
+	                $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
 		            $stmt = $mysqli->query($sql);
+					var_dump($stmt); exit;
 		            $row = $stmt->fetch_object();
+					echo $row->id; exit;
 		            $latest = $row->id;
 		            $stmt->close();
 		            $mysqli->close();
