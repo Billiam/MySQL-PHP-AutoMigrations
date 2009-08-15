@@ -25,6 +25,8 @@ class MpmDbHelper
      * @uses MpmDbHelper::getPdoObj()
      * @uses MpmDbHelper::getMysqliObj()
      * @uses MpmDbHelper::getMethod()
+     * @uses MPM_METHOD_PDO
+     * @uses MPM_METHOD_MYSQLI
      *
      * @return object
      */
@@ -65,7 +67,7 @@ class MpmDbHelper
      *
      * @throws MpmDatabaseConnectionException if unable to connect to the database
      *
-     * @return mysqli
+     * @return ExceptionalMysqli
      */
     static public function getMysqliObj()
     {
@@ -92,6 +94,11 @@ class MpmDbHelper
     
     /**
      * Performs a query; $sql should be a SELECT query that returns exactly 1 row of data; returns an object that contains the row
+     *
+     * @uses MpmDbHelper::getDbObj()
+     * @uses MpmDbHelper::getMethod()
+     * @uses MPM_METHOD_PDO
+     * @uses MPM_METHOD_MYSQLI
      *
      * @param string $sql a SELECT query that returns exactly 1 row of data
      *
@@ -125,6 +132,11 @@ class MpmDbHelper
     
     /**
      * Performs a SELECT query
+     *
+     * @uses MpmDbHelper::getDbObj()
+     * @uses MpmDbHelper::getMethod()
+     * @uses MPM_METHOD_PDO
+     * @uses MPM_METHOD_MYSQLI
      *
      * @param string $sql a SELECT query
      *
@@ -169,6 +181,15 @@ class MpmDbHelper
      * @uses MpmDbHelper::getMethod()
      * @uses MpmDbHelper::getPdoObj()
      * @uses MpmDbHelper::getMysqliObj()
+     * @uses MpmDbHelper::getMethod()
+     * @uses MpmDbHelper::checkForDbTable()
+     * @uses MpmCommandLineWriter::getInstance()
+     * @uses MpmCommandLineWriter::addText()
+     * @uses MpmCommandLineWriter::write()
+     * @uses MPM_METHOD_PDO
+     * @uses MPM_METHOD_MYSQLI
+     *
+     * @return void     
      */
     static public function test()
     {
@@ -244,6 +265,11 @@ class MpmDbHelper
 	/**
 	 * Checks whether or not the mpm_migrations database table exists.
 	 *
+     * @uses MpmDbHelper::getDbObj()
+     * @uses MpmDbHelper::getMethod()
+     * @uses MPM_METHOD_PDO
+     * @uses MPM_METHOD_MYSQLI
+     * 
 	 * @return bool
 	 */
 	static public function checkForDbTable()
@@ -289,6 +315,5 @@ class MpmDbHelper
 	}
 
 }
-
 
 ?>

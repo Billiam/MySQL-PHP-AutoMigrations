@@ -20,6 +20,14 @@ class MpmStatusController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
+	 * @uses MpmDbHelper::test()
+	 * @uses MpmMigrationHelper::getCurrentMigrationTimestamp()
+	 * @uses MpmMigrationHelper::getCurrentMigrationNumber()
+	 * @uses MpmListHelper::getFullList()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::writeHeader()
+	 * @uses MpmCommandLineWriter::writeFooter()
+	 *
 	 * @return void
 	 */
 	public function doAction()
@@ -55,6 +63,7 @@ class MpmStatusController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

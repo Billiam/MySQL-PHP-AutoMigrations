@@ -21,6 +21,8 @@ class MpmHelpController extends MpmController
 	 * Determines what action should be performed and takes that action.
 	 *
 	 * @uses MpmHelpController::displayHelp()
+	 * @uses MpmStringHelper::strToCamel()
+	 * @uses MpmAutoloadHelper::load()
 	 * 
 	 * @return void
 	 */
@@ -50,6 +52,7 @@ class MpmHelpController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

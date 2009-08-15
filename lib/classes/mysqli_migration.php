@@ -19,7 +19,7 @@ abstract class MpmMysqliMigration
 	/**
 	 * Migrates the database up.
 	 * 
-	 * @param mysqli $mysqli an ExceptionalMysqli object
+	 * @param ExceptionalMysqli $mysqli an ExceptionalMysqli object
 	 *
 	 * @return void
 	 */
@@ -28,7 +28,7 @@ abstract class MpmMysqliMigration
 	/** 
 	 * Migrates down (reverses changes made by the up method).
 	 *
-	 * @param mysqli $mysqli a mysqli object
+	 * @param ExceptionalMysqli $mysqli an ExceptionalMysqli object
 	 *
 	 * @return void
 	 */

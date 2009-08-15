@@ -20,8 +20,16 @@ class MpmRunController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
-	 * @uses MpmUpController::displayHelp()
-	 * 
+	 * @uses MpmRunController::displayHelp()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
+	 * @uses MpmCommandLineWriter::writeHeader()
+	 * @uses MpmCommandLineWriter::writeFooter()
+	 * @uses MpmMigrationHelper::doesMigrationExist() 
+	 * @uses MpmMigrationHelper::getMigrationObject()
+	 * @uses MpmMigrationHelper::runMigration()
+	 *
 	 * @return void
 	 */
 	public function doAction()
@@ -83,6 +91,7 @@ class MpmRunController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

@@ -115,6 +115,13 @@ class MpmStringHelper
         return $lower;
     }
     
+    /**
+     * Adds single quotes and escapes single quotes and backslashes to the given string
+     *
+     * @param string $arg the string we need to quote
+     *
+     * @return string
+     */
     static public function addSingleQuotes($arg) 
     { 
       /* single quote and escape single quotes and backslashes */ 

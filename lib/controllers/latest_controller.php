@@ -21,7 +21,11 @@ class MpmLatestController extends MpmController
 	 * Determines what action should be performed and takes that action.
 	 *
 	 * @uses MpmLatestController::displayHelp()
-	 * @uses MpmMigrationsHelper::getTotalMigrations()
+	 * @uses MpmDbHelper::test()
+	 * @uses MpmMigrationHelper::getMigrationCount()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmMigrationHelper::getLatestMigration()
+	 * @uses MpmUpController::doAction()
 	 * 
 	 * @return void
 	 */
@@ -61,6 +65,7 @@ class MpmLatestController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

@@ -21,6 +21,11 @@ class MpmListController extends MpmController
 	 * Determines what action should be performed and takes that action.
 	 *
 	 * @uses MpmListController::displayHelp()
+	 * @uses MpmListHelper::getFullList()
+	 * @uses MpmListHelper::getTotalMigrations()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
 	 * 
 	 * @return void
 	 */
@@ -84,6 +89,7 @@ class MpmListController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

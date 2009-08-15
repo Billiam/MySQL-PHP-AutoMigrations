@@ -20,6 +20,8 @@ class MpmControllerFactory
 	/**
 	 * Given an array of command line arguments ($argv), determines the controller needed and returns that object.
 	 *
+	 * @uses MpmStringHelper::strToCamel()
+	 *
 	 * @return MpmController
 	 */
 	static public function getInstance($argv)

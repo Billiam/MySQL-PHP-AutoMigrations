@@ -20,6 +20,13 @@ class MpmAddController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
+	 * @uses MPM_DB_PATH
+	 * @uses MpmDbHelper::test()
+	 * @uses MpmListHelper::getFiles()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::addText()
+	 * @uses MpmCommandLineWriter::write()
+	 * @uses MpmDbHelper::getMethod()
 	 * @uses MpmUpController::displayHelp()
 	 * 
 	 * @return void
@@ -75,6 +82,7 @@ class MpmAddController extends MpmController
 			$file .= "?>";
 		}
 		
+		// write the file
 		$fp = fopen(MPM_DB_PATH . $filename, "w");
 		if ($fp == false)
 		{
@@ -91,15 +99,16 @@ class MpmAddController extends MpmController
 		}
 		fclose($fp);
 		
+		// display success message
 		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('New migration created: file /db/' . $filename);
 		$obj->write();
-		
 	}
 
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

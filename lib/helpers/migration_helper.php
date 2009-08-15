@@ -17,6 +17,15 @@
 class MpmMigrationHelper
 {
     
+    /**
+     * Sets the current active migration.
+     *
+     * @uses MpmDbHelper::getDbObj()
+     *
+     * @param int $id the ID of the migration to set as the current one
+     *
+     * @return void
+     */
     static public function setCurrentMigration($id)
     {
         $sql1 = "UPDATE `mpm_migrations` SET `is_current` = '0'";
@@ -42,6 +51,13 @@ class MpmMigrationHelper
 	/**
 	 * Performs a single migration.
 	 *
+	 * @uses MpmStringHelper::getFilenameFromTimestamp()
+	 * @uses MpmDbHelper::getPdoObj()
+	 * @uses MpmDbHelper::getMysqliObj()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::writeLine()
+	 * @uses MPM_DB_PATH
+	 *
 	 * @param object  $obj        		    a simple object with migration information (from a migration list)
 	 * @param int    &$total_migrations_run a running total of migrations run
 	 * @param bool    $forced               if true, exceptions will not cause the script to exit
@@ -62,10 +78,17 @@ class MpmMigrationHelper
 	    
 	    // file exists -- run the migration
 		echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
-	    $dbObj = MpmDbHelper::getDbObj();
-		$dbObj->beginTransaction();
 		require_once(MPM_DB_PATH . $filename);
 		$migration = new $classname();
+        if ($migration instanceof MpmMigration) // need PDO object
+        {
+            $dbObj = MpmDbHelper::getPdoObj();
+        }
+        else
+        {
+            $dbObj = MpmDbHelper::getMysqliObj();
+        }
+   		$dbObj->beginTransaction();
 		if ($method == 'down')
 		{
 			$active = 0;
@@ -103,6 +126,11 @@ class MpmMigrationHelper
 
 	/**
 	 * Returns the timestamp of the migration currently rolled to.
+	 *
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MPM_METHOD_PDO
+	 * @uses MPM_METHOD_MYSQLI
 	 *
 	 * @return string
 	 */
@@ -144,6 +172,13 @@ class MpmMigrationHelper
 	
 	/**
 	 * Returns an array of migrations which need to be run (in order).
+	 *
+	 * @uses MpmMigrationHelper::getTimestampFromId()
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getPdoObj()
+	 * @uses MpmDbHelper::getMysqliObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
 	 *
 	 * @param int    $toId      the ID of the migration to stop on
 	 * @param string $direction the direction of the migration; should be 'up' or 'down'
@@ -203,6 +238,12 @@ class MpmMigrationHelper
 
     /**
      * Returns a timestamp when given a migration ID number.
+     *
+     * @uses MpmDbHelper::getMethod()
+     * @uses MpmDbHelper::getPdoObj()
+     * @uses MpmDbHelper::getMysqliObj()
+     * @uses MPM_METHOD_MYSQLI
+     * @uses MPM_METHOD_PDO
      *
      * @param int $id the ID number of the migration
      *
@@ -266,6 +307,11 @@ class MpmMigrationHelper
 	/**
 	 * Returns the number of the migration currently rolled to.
 	 *
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
+	 *
 	 * @return string
 	 */
 	static public function getCurrentMigrationNumber()
@@ -294,17 +340,15 @@ class MpmMigrationHelper
 	                $sql = "SELECT COUNT(*) as total FROM `mpm_migrations` WHERE `is_current` = 1";
             	    $stmt = $mysqli->query($sql);
             	    $row = $stmt->fetch_object();
-            	    if ($row->total == 1)
+            	    if ($row->total == 0)
 		            {
 		                return false;
 		            }
-	                unset($stmt);
 	                $stmt->close();
+	                unset($stmt);
 	                $sql = "SELECT `id` FROM `mpm_migrations` WHERE `is_current` = 1";
 		            $stmt = $mysqli->query($sql);
-					var_dump($stmt); exit;
 		            $row = $stmt->fetch_object();
-					echo $row->id; exit;
 		            $latest = $row->id;
 		            $stmt->close();
 		            $mysqli->close();
@@ -322,7 +366,10 @@ class MpmMigrationHelper
 	/**
 	 * Returns the total number of migrations.
 	 *
-	 * @uses MpmDb::getPdo() 
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
 	 *
 	 * @return int
 	 */
@@ -356,6 +403,16 @@ class MpmMigrationHelper
 	    return $count;
 	}
 	
+	/**
+	 * Returns the ID of the latest migration.
+	 *
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
+	 *
+	 * @return int
+	 */
 	static public function getLatestMigration()
 	{
         $sql = "SELECT `id` FROM `mpm_migrations` ORDER BY `timestamp` DESC LIMIT 0,1";
@@ -385,6 +442,18 @@ class MpmMigrationHelper
 	    return $to_id;
 	}
 	
+	/**
+	 * Checks to see if a migration with the given ID actually exists.
+	 *
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
+	 *
+	 * @param int $id the ID of the migration
+	 *
+	 * @return int
+	 */
 	static public function doesMigrationExist($id)
 	{
         $sql = "SELECT COUNT(*) as total FROM `mpm_migrations` WHERE `id` = '$id'";
@@ -421,6 +490,18 @@ class MpmMigrationHelper
 	    return $return;
 	}
 	
+	/**
+	 * Returns a migration object; this object contains all data stored in the DB for the particular migration ID.
+	 *
+	 * @uses MpmDbHelper::getMethod()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MPM_METHOD_PDO
+	 *
+	 * @param int $id the ID of the migration
+	 *
+	 * @return object
+	 */
 	static public function getMigrationObject($id)
 	{
 		$sql = "SELECT * FROM `mpm_migrations` WHERE `id` = '$id'";

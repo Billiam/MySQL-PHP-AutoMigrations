@@ -20,6 +20,12 @@ class MpmInitController extends MpmController
 	/**
 	 * Determines what action should be performed and takes that action.
 	 *
+	 * @uses MPM_PATH
+	 * @uses MPM_METHOD_PDO
+	 * @uses MPM_METHOD_MYSQLI
+	 * @uses MpmDbHelper::checkForDbTable()
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MpmDbHelper::getMethod()
 	 * @uses MpmInitController::displayHelp()
 	 * 
 	 * @return void
@@ -215,6 +221,7 @@ class MpmInitController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

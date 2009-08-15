@@ -34,6 +34,9 @@ abstract class MpmController
 	/** 
 	 * Object constructor.
 	 * 
+	 * @uses MpmDbHelper::test()
+	 * @uses MpmListHelper::mergeFilesWithDb()
+	 *
 	 * @param array $arguments an array of command line arguments (minus the first two elements which should already be shifted off from the MpmControllerFactory)
 	 *
 	 * @return MpmController
@@ -59,13 +62,10 @@ abstract class MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
-	 * @uses MpmCommandLineWriter
-	 * 
 	 * @return void
 	 */
 	abstract public function displayHelp();
 	
 }
-
 
 ?>

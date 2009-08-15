@@ -21,19 +21,29 @@ class MpmDownController extends MpmController
 	 * Determines what action should be performed and takes that action.
 	 *
 	 * @uses MpmDownController::displayHelp()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::writeHeader()
+	 * @uses MpmMigrationHelper::getListOfMigrations()
+	 * @uses MpmMigrationHelper::getCurrentMigrationNumber()
+	 * @uses MpmMigrationHelper::getTimestampFromId()
+	 * @uses MpmMigrationHelper::runMigration()
+	 * @uses MpmMigrationHelper::setCurrentMigration()
 	 * 
 	 * @return void
 	 */
 	public function doAction()
 	{
+	    // write the header
 		$clw = MpmCommandLineWriter::getInstance();
 		$clw->writeHeader();
 		
+		// correct number of command line arguments?
 		if (count($this->arguments) == 0)
 		{
 			return $this->displayHelp();
 		}
 		
+		// ID of the migration we are going down to
 		$down_to = $this->arguments[0];
 		if (!is_numeric($down_to))
 		{
@@ -51,6 +61,7 @@ class MpmDownController extends MpmController
 		    $forced = true;
 		}
 		
+		// get list of migrations and the current migration number
 		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
 		$total = count($list);
 		$current = MpmMigrationHelper::getCurrentMigrationNumber();
@@ -77,6 +88,7 @@ class MpmDownController extends MpmController
 	/**
 	 * Displays the help page for this controller.
 	 * 
+	 * @uses MpmCommandLineWriter::getInstance()
 	 * @uses MpmCommandLineWriter::addText()
 	 * @uses MpmCommandLineWriter::write()
 	 * 

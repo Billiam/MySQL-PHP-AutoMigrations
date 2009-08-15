@@ -20,6 +20,8 @@ class MpmListHelper
     /**
      * Returns the total number of migrations available.
      *
+     * @uses MpmDbHelper::doSingleRowSelect()
+     *
      * @return int
      */
     static function getTotalMigrations()
@@ -31,6 +33,8 @@ class MpmListHelper
     
     /**
      * Returns a full list of all migrations.
+     *
+     * @uses MpmDbHelper::doMultiRowSelect()
      *
      * @param int $startIdx the start index number
      * @param int $total    total number of records to return
@@ -52,6 +56,15 @@ class MpmListHelper
     /**
      * Fetches a list of files and adds migrations to the database migrations table.
      * 
+     * @uses MpmListHelper::getListOfFiles()
+     * @uses MpmListHelper::getTotalMigrations()
+     * @uses MpmListHelper::getFullList()
+     * @uses MpmListHelper::getTimestampArray()
+     * @uses MpmDbHelper::getMethod()
+     * @uses MpmDbHelper::getPdoObj()
+     * @uses MpmDbHelper::getMysqliObj()
+     * @uses MPM_METHOD_PDO
+     *
      * @return void
      */
     static function mergeFilesWithDb()
@@ -186,6 +199,9 @@ class MpmListHelper
 	/**
 	 * Returns an array of objects which hold data about a migration file (timestamp, file, etc.).
 	 *
+	 * @uses MPM_DB_PATH
+	 * @uses MpmStringHelper::getTimestampFromFilename()
+	 *
 	 * @param string $sort should either be old or new; determines how the migrations are sorted in the array
 	 *
 	 * @return array
@@ -221,6 +237,8 @@ class MpmListHelper
 	/**
 	 * Returns an array of migration filenames.
 	 *
+	 * @uses MpmListHelper::getListOfFiles()
+	 *
 	 * @return array
 	 */
 	static public function getFiles()
@@ -236,6 +254,9 @@ class MpmListHelper
 	
 	/**
 	 * Fetches a list of migrations which have already been run.
+	 *
+	 * @uses MpmDbHelper::doSingleRowSelect()
+	 * @uses MpmDbHelper::doMultiRowSelect()
 	 *
 	 * @param string $latestTimestamp the current timestamp of the migration run last
 	 * @param string $direction the way we are migrating; should either be up or down
@@ -266,8 +287,7 @@ class MpmListHelper
 		}
 		return $list;
 	}
-	
-	
+		
 }
 
 ?>

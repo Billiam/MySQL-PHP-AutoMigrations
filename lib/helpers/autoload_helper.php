@@ -20,9 +20,10 @@ class MpmAutoloadHelper
 	/**
 	 * When part of the class autoloader stack, this method will dynamically try to located the proper class file and include it if the class is instantiated without already existing.
 	 *
-	 * @uses MPM_PATH
-	 *
 	 * @throws MpmClassUndefinedException
+	 *
+	 * @uses MPM_PATH
+	 * @uses MpmStringHelper::camelToLower()
 	 *
 	 * @param string $class_name the name of the class being instantiated
 	 *

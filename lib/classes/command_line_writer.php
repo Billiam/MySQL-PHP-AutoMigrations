@@ -76,6 +76,7 @@ class MpmCommandLineWriter
 		$obj->text = $text;
 		$obj->indent = $indent;
 		$this->text[] = $obj;
+		return;
 	}
 	
 	/**
@@ -120,10 +121,13 @@ class MpmCommandLineWriter
 			$txt->indent = 0;
 			array_unshift($this->text, $txt);
 		}
+		return;
 	}
 	
 	/**
 	 * Adds the footer to the $text property.
+	 *
+	 * @uses MpmCommandLineWriter::addText()
 	 *
 	 * @return void
 	 */
@@ -140,13 +144,24 @@ class MpmCommandLineWriter
 		$bar_obj->text = $bar;
 		$bar_obj->indent = 0;
 		array_push($this->text, $bar_obj);
+		return;
 	}
 	
+	/**
+	 * Writes the header, text, and footer.
+	 *
+	 * @uses MpmCommandLineWriter::writeHeader()
+	 * @uses MpmCommandLineWriter::writeText()
+	 * @uses MpmCommandLineWriter::writeFooter()
+	 *
+	 * @return void
+	 */
 	public function write()
 	{
 		$this->writeHeader();
 		$this->writeText();
 		$this->writeFooter();
+		return;
 	}
 	
 	/**
@@ -176,18 +191,22 @@ class MpmCommandLineWriter
 		}
 		foreach ($all_lines as $line)
 		{
-			//$body .= '* ';
 		    $body .= $line;
 			for ($i = 0; $i < $max_line_len - strlen($line); $i++)
 			{
 				$body .= " ";
 			}
-			//$body .= " *\n";
 			$body .= "\n";
 		}
 		echo $body;
+		return;
 	}
 	
+	/**
+	 * Writes a single line to the console.
+	 *
+	 * @return void
+	 */
 	public function writeLine($txt, $ind = 0)
 	{
 	    $obj = (Object) array();
@@ -221,6 +240,14 @@ class MpmCommandLineWriter
 		return;
 	}
 	
+	/**
+	 * Writes the header to the console.
+	 *
+	 * @uses MpmCommandLineWriter::addHeader()
+	 * @uses MpmCommandLineWriter::writeText()
+	 *
+	 * @return void
+	 */
 	public function writeHeader()
 	{
 		$text = $this->text;
@@ -228,8 +255,17 @@ class MpmCommandLineWriter
 		$this->addHeader();
 		$this->writeText();
 		$this->text = $text;
+		return;
 	}
 	
+	/**
+	 * Writes the footer to the console.
+	 *
+	 * @uses MpmCommandLineWriter::addFooter()
+	 * @uses MpmCommandLineWriter::writeText()
+	 *
+	 * @return void
+	 */
 	public function writeFooter()
 	{
 		$text = $this->text;
