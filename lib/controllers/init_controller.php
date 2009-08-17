@@ -27,6 +27,10 @@ class MpmInitController extends MpmController
 	 * @uses MpmDbHelper::getDbObj()
 	 * @uses MpmDbHelper::getMethod()
 	 * @uses MpmInitController::displayHelp()
+	 * @uses MpmCommandLineWriter::getInstance()
+	 * @uses MpmCommandLineWriter::writeHeader()
+	 * @uses MpmCommandLineWriter::writeFooter()
+	 * @uses MpmBuildController::build()
 	 * 
 	 * @return void
 	 */
@@ -37,6 +41,10 @@ class MpmInitController extends MpmController
 		$port = '';
 		$db_path = '';
 		$method = 0;
+		
+		$clw = MpmCommandLineWriter::getInstance();
+		$clw->writeHeader();
+		echo "Defaults are in brackets ([]).  To accept the default, simply press ENTER.\n\n";
 		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
 		{
@@ -49,32 +57,72 @@ class MpmInitController extends MpmController
 			if (empty($answer) || substr($answer, 0, 1) == 'n')
 			{
 				echo "\nABORTED!\n\n";
+				$clw->writeFooter();
 				exit;
+			}
+			else
+			{
+			    require(MPM_PATH . '/config/db_config.php');
 			}
 		}
 		
 		do 
 		{
-			echo "\nWhich method would you like to use to connect to the database?  ".MPM_METHOD_PDO."=PDO or ".MPM_METHOD_MYSQLI."=MySQLi: ";
+			echo "\nWhich method would you like to use to connect to\nthe database?  ".MPM_METHOD_PDO."=PDO or ".MPM_METHOD_MYSQLI."=MySQLi";
+			if (isset($db_config))
+			{
+			    echo " [" . $db_config->method . "]";
+			}
+			echo ": ";
 			$method = fgets(STDIN);
 			$method = trim($method);
 			if (!is_numeric($method))
 			{
 			    $method = 0;
 			}
+			if (empty($method) && isset($db_config))
+			{
+			    $method = $db_config->method;
+			}
 		} while ($method < MPM_METHOD_PDO || $method > MPM_METHOD_MYSQLI || $method == 0);
 
-		echo "\nEnter your MySQL database hostname or IP address [localhost]: ";
+		echo "\nEnter your MySQL database hostname or IP address [";
+		if (isset($db_config))
+		{
+		    echo $db_config->host;
+		}
+		else
+		{
+		    echo 'localhost';
+		}
+		echo ']: ';
 		$host = fgets(STDIN);
 		$host = trim($host);
 		if (empty($host))
 		{
-			$host = 'localhost';
+    		if (isset($db_config))
+    		{
+    		    $host = $db_config->host;
+    		}
+    		else
+    		{
+    			$host = 'localhost';
+    		}
 		}
 
 		while (empty($port))
 		{
-			echo "\nEnter your MySQL database port [3306]: ";
+			echo "\nEnter your MySQL database port [";
+		    if (isset($db_config))
+		    {
+		        echo $db_config->port;
+		    }
+		    else
+		    {
+		        echo '3306';
+		    }
+		    echo ']: ';
+			
 			$port = fgets(STDIN);
 			$port = trim($port);
 			if (empty($port))
@@ -89,26 +137,71 @@ class MpmInitController extends MpmController
 		
 		while (empty($user))
 		{
-			echo "\nEnter your MySQL database username: ";
+			echo "\nEnter your MySQL database username";
+		    if (isset($db_config))
+		    {
+		        echo ' [', $db_config->user, ']';
+		    }
+		    echo ': ';
 			$user = fgets(STDIN);
 			$user = trim($user);
+			if (empty($user) && isset($db_config))
+			{
+			    $user = $db_config->user;
+			}
 		}
 		
-		echo "\nEnter your MySQL database password []: ";
+		echo "\nEnter your MySQL database password (enter - for no password) [";
+		if (isset($db_config))
+		{
+		    echo $db_config->pass;
+		}
+		echo ']: ';
 		$pass = fgets(STDIN);
 		$pass = trim($pass);
+		if (empty($pass) && isset($db_config))
+		{
+		    $pass = $db_config->pass;
+		}
+		else if ($pass == '-')
+		{
+		    $pass = '';
+		}
+		
 		
 		while (empty($dbname))
 		{
-			echo "\nEnter your MySQL database name: ";
+			echo "\nEnter your MySQL database name";
+			if (isset($db_config))
+			{
+			    echo ' [', $db_config->name, ']';
+			}
+			echo ': ';
 			$dbname = fgets(STDIN);
 			$dbname = trim($dbname);
+			if (empty($dbname) && isset($db_config))
+			{
+			    $dbname = $db_config->name;
+			}
 		}
 		
-		echo "\nEnter the directory where you'd like to store your migration files [".MPM_PATH."/db/]: ";
+		echo "\nEnter the directory where you'd like to store your\nmigration files [";
+		if (isset($db_config))
+		{
+		    echo $db_config->db_path;
+    	}
+    	else
+    	{
+    	    echo MPM_PATH . '/db/';
+    	}
+    	echo ']: ';
 		$db_path = fgets(STDIN);
 		$db_path = trim($db_path);
-		if (empty($db_path))
+		if (empty($db_path) && isset($db_config))
+		{
+		    $db_path = $db_config->db_path;
+		}
+		else if (empty($db_path) && !isset($db_config))
 		{
 		    $db_path = MPM_PATH . '/db/';
 		}
@@ -118,6 +211,18 @@ class MpmInitController extends MpmController
 		}
 		
 		$method = (int) $method;
+		
+		if (file_exists($db_path . 'schema.php'))
+		{
+		    echo "\nPerform build of database after initialization (builds schema\nand runs all existing migrations) [y/N]: ";
+		    $do_build = fgets(STDIN);
+		    $do_build = trim($do_build);
+		    $doBuild = false;
+            if (strcasecmp(substr($do_build, 0, 1), 'y') == 0)
+            {
+                $doBuild = true;
+            }
+		}
 		
 		$file = '<?php' . "\n\n";
 		$file .= '$db_config = (object) array();' . "\n";
@@ -203,7 +308,7 @@ class MpmInitController extends MpmController
 			}
 			else
 			{
-				echo "found.\n";
+				echo "found.\n\n";
 			}
 			
 		}
@@ -214,7 +319,15 @@ class MpmInitController extends MpmController
 			exit;
 		}
 		
-		echo "Initalization complete!\n\n";
+		if (isset($doBuild) && $doBuild === true)
+		{
+		    $obj = new MpmBuildController();
+		    $obj->build();
+		    echo "\n\n";
+		}
+		
+		echo "Initalization complete!  Type 'php migrate.php help' for a list of commands.\n\n";
+		$clw->writeFooter();
 		exit;
 	}
 

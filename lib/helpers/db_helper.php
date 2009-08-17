@@ -101,14 +101,18 @@ class MpmDbHelper
      * @uses MPM_METHOD_MYSQLI
      *
      * @param string $sql a SELECT query that returns exactly 1 row of data
+     * @param object $db  a PDO or ExceptionalMysqli object that can be used to run the query
      *
      * @return obj
      */
-    static public function doSingleRowSelect($sql)
+    static public function doSingleRowSelect($sql, &$db = null)
     {
         try
         {
-            $db = MpmDbHelper::getDbObj();
+            if ($db == null)
+            {
+                $db = MpmDbHelper::getDbObj();
+            }
             switch (MpmDbHelper::getMethod())
             {
                 case MPM_METHOD_PDO:
@@ -274,44 +278,59 @@ class MpmDbHelper
 	 */
 	static public function checkForDbTable()
 	{
-		$tables = array();
-		if (MpmDbHelper::getMethod() == MPM_METHOD_PDO)
-		{
-    		$pdo = MpmDbHelper::getDbObj();
-    		$sql = "SHOW TABLES";
-    	    try
-    	    {
-        		foreach ($pdo->query($sql) as $row)
-        		{
-        			$tables[] = $row[0];
-        		}
-    	    }
-    	    catch (Exception $e)
-    	    {
-    	        return false;
-    	    }
-        }
-		else
-		{
-			$mysqli = MpmDbHelper::getDbObj();
-			try
-			{
-				$result = $mysqli->query('SHOW TABLES');
-				while ($row = $result->fetch_array())
-				{
-					$tables[] = $row[0];
-				}
-			}
-			catch (Exception $e)
-			{
-				return false;
-			}
-		}
+	    $tables = MpmDbHelper::getTables();
 		if (count($tables) == 0 || !in_array('mpm_migrations', $tables))
 	    {
 	        return false;
 	    }
 	    return true;
+	}
+	
+	/**
+	 * Returns an array of all the tables in the database.
+	 *
+	 * @uses MpmDbHelper::getDbObj()
+	 * @uses MpmDbHelper::getMethod()
+	 *
+	 * @return array
+	 */
+	static public function getTables(&$dbObj = null)
+	{
+	    if ($dbObj == null)
+	    {
+	        $dbObj = MpmDbHelper::getDbObj();
+	    }
+   		$sql = "SHOW TABLES";
+    	$tables = array();
+		switch (MpmDbHelper::getMethod())
+		{
+		    case MPM_METHOD_PDO:
+        	    try
+        	    {
+            		foreach ($dbObj->query($sql) as $row)
+            		{
+            			$tables[] = $row[0];
+            		}
+        	    }
+        	    catch (Exception $e)
+        	    {
+        	    }
+        	    break;
+        	case MPM_METHOD_MYSQLI:
+			    try
+			    {
+				    $result = $dbObj->query($sql);
+				    while ($row = $result->fetch_array())
+				    {
+					    $tables[] = $row[0];
+				    }
+			    }
+			    catch (Exception $e)
+			    {
+			    }
+			    break;
+		}
+		return $tables;
 	}
 
 }

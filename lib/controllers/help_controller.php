@@ -63,6 +63,7 @@ class MpmHelpController extends MpmController
 		$obj = MpmCommandLineWriter::getInstance();
 		$obj->addText('The Following Commands Are Available:');
 		$obj->addText('add    - add a new migration', 4);
+		$obj->addText('build  - builds the database', 4);
 		$obj->addText('down   - roll down to a previous migration', 4);
 		$obj->addText('help   - get more specific help about individual commands', 4);
 		$obj->addText('init   - initialize the migrations', 4);

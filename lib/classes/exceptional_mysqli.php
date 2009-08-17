@@ -22,7 +22,7 @@ class ExceptionalMysqli extends mysqli
      *
      * You can pass all the same parameters to this constructor as you would when instantiating a mysqli object.
      *
-     * @throws DatabaseConnectionException
+     * @throws MpmDatabaseConnectionException
      *
      * @uses MpmStringHelper::addSingleQuotes()
      *
@@ -34,14 +34,14 @@ class ExceptionalMysqli extends mysqli
         eval("parent::__construct(" . join(',', array_map('MpmStringHelper::addSingleQuotes', $args)) . ");");
         if ($this->connect_errno)
         {
-            throw new DatabaseConnectionException($this->connect_error);
+            throw new MpmDatabaseConnectionException($this->connect_error);
         }
     }
     
     /**
      * Wrapper for the mysqli::query method.
      *
-     * @throws MalformedQueryException
+     * @throws MpmMalformedQueryException
      *
      * @param string $query      the SQL query to send to MySQL
      * @param int    $resultMode Either the constant MYSQLI_USE_RESULT or MYSQLI_STORE_RESULT depending on the desired behavior
@@ -53,7 +53,7 @@ class ExceptionalMysqli extends mysqli
         $result = parent::query($query, $resultMode);
         if ($this->errno)
         {
-            throw new MalformedQueryException($this->error);
+            throw new MpmMalformedQueryException($this->error);
         }
         return $result;
     }

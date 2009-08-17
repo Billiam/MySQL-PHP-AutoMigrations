@@ -221,7 +221,7 @@ class MpmListHelper
 		foreach ($files as $file)
 		{
 			$full_file = MPM_DB_PATH . $file;
-			if ($file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
+			if ($file != 'schema.php' && $file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
 			{
                 $timestamp = MpmStringHelper::getTimestampFromFilename($file);
 				$obj = (object) array();

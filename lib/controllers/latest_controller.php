@@ -27,9 +27,11 @@ class MpmLatestController extends MpmController
 	 * @uses MpmMigrationHelper::getLatestMigration()
 	 * @uses MpmUpController::doAction()
 	 * 
+	 * @param bool $quiet supresses certain text when true
+	 *
 	 * @return void
 	 */
-	public function doAction()
+	public function doAction($quiet = false)
 	{
 		// make sure we're init'd
 		MpmDbHelper::test();
@@ -53,7 +55,7 @@ class MpmLatestController extends MpmController
 			}
 			$to_id = MpmMigrationHelper::getLatestMigration();
 			$obj = new MpmUpController('up', array ( $to_id, $forced ));
-    		$obj->doAction();
+    		$obj->doAction($quiet);
 		}
 		catch (Exception $e)
 		{

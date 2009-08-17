@@ -134,7 +134,7 @@ class MpmCommandLineWriter
 	private function addFooter()
 	{
 		$this->addText(' ');
-		$max_line_len = $this->maxWidth;
+		$max_line_len = $this->maxWidth - 1;
 		$bar = '';
 		for ($i = 0; $i < $max_line_len; $i++)
 		{

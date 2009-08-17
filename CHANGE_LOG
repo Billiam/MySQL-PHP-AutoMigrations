@@ -1,3 +1,14 @@
+= VERSION 2.0.0 =
+  * added support for mysqli; can now select during initialization whether to use PDO or mysqli for connecting to the database
+  * added build command; allows entire database structure to be erased and rebuilt from an initial schema and applying migrations
+  * "add" argument with build command creates a stub schema file if one doesn't currently exist
+  * added build option during initialization
+  * made init command smarter; if existing config exists, those values are now used as defaults
+  * added header/footer to init command
+  * cleaned up internal code documentation
+  * removed extra asterisk in the footer
+  * added blank line before footer in up and down controller
+
 = VERSION 1.4.2 =
 
   * fixed bug (issue 1): use of unreliable PDO::rowCount() caused migrations to not be found in some cases

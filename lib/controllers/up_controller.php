@@ -29,12 +29,18 @@ class MpmUpController extends MpmController
 	 * @uses MpmMigrationHelper::runMigration()
 	 * @uses MpmMigrationHelper::setCurrentMigration
 	 * 
+	 * @param bool $quiet supresses certain text when true
+	 *
 	 * @return void
 	 */
-	public function doAction()
+	public function doAction($quiet = false)
 	{
 		$clw = MpmCommandLineWriter::getInstance();
-		$clw->writeHeader();
+		
+		if (!$quiet)
+		{
+		    $clw->writeHeader();
+		}
 		
 		if (count($this->arguments) == 0)
 		{
@@ -60,14 +66,24 @@ class MpmUpController extends MpmController
         
 		if (count($list) == 0)
 		{
-		    echo 'All needed migrations have already been run or no migrations exist.';
-		    $clw->writeFooter();
-		    exit;
+		    if (!$quiet)
+		    {
+		        echo 'All needed migrations have already been run or no migrations exist.';
+		        $clw->writeFooter();
+		        exit;
+		    }
+		    else
+		    {
+		        return;
+		    }
 		}
 		
 		$to = MpmMigrationHelper::getTimestampFromId($up_to);
 		
-		echo "Migrating to " . $to . ' (ID '.$up_to.')... ';
+		if (!$quiet)
+		{
+		    echo "Migrating to " . $to . ' (ID '.$up_to.')... ';
+		}
 		
 		foreach ($list as $id => $obj)
 		{
@@ -76,7 +92,11 @@ class MpmUpController extends MpmController
 		
 		MpmMigrationHelper::setCurrentMigration($up_to);
 		
-		$clw->writeFooter();
+		if (!$quiet)
+		{
+		    echo "\n";
+		    $clw->writeFooter();
+		}
 	}
 
 	/**
