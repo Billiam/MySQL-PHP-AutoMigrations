@@ -38,6 +38,8 @@ class MpmBuildController extends MpmController
 		
 		$clw = MpmCommandLineWriter::getInstance();
 
+        $forced = false;
+
         // are we adding a schema file?
         if (isset($this->arguments[0]) && $this->arguments[0] == 'add')
         {
@@ -119,6 +121,10 @@ class MpmBuildController extends MpmController
             exit;
 
         }
+        else if (isset($this->arguments[0]) && $this->arguments[0] == '--force')
+        {
+            $forced = true;
+        }
 		
         // make sure the schema file exists
         if (!file_exists(MPM_DB_PATH . 'schema.php'))
@@ -130,16 +136,19 @@ class MpmBuildController extends MpmController
         
         $clw->writeHeader();
         
-		echo "\nWARNING:  IF YOU CONTINUE, ALL TABLES IN YOUR DATABASE WILL BE ERASED!";
-		echo "\nDO YOU WANT TO CONTINUE? [y/N] ";
-		$answer = fgets(STDIN);
-		$answer = trim($answer);
-		$answer = strtolower($answer);
-		if (empty($answer) || substr($answer, 0, 1) == 'n')
-		{
-			echo "\nABORTED!\n\n";
-			$clw->writeFooter();
-			exit;
+        if (!$forced)
+        {
+		    echo "\nWARNING:  IF YOU CONTINUE, ALL TABLES IN YOUR DATABASE WILL BE ERASED!";
+		    echo "\nDO YOU WANT TO CONTINUE? [y/N] ";
+		    $answer = fgets(STDIN);
+		    $answer = trim($answer);
+		    $answer = strtolower($answer);
+		    if (empty($answer) || substr($answer, 0, 1) == 'n')
+		    {
+			    echo "\nABORTED!\n\n";
+			    $clw->writeFooter();
+			    exit;
+		    }
 		}
         
         echo "\n";
@@ -188,11 +197,13 @@ class MpmBuildController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php build [add]');
+		$obj->addText('./migrate.php build [--force|add]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to build the database.  If a schema.php file is found in the migrations directory, the MpmSchema::Build() method will be called.  Then, all migrations will be run against the database.');
 		$obj->addText(' ');
 		$obj->addText('Use the "add" argument to create an empty stub for the schema.php file.  You can then add your own query statements.');
+		$obj->addText(' ');
+		$obj->addText('If you use the "--force" argument instead of the "add" argument, you will not be prompted to confirm the action (good for scripting a build process).');
 		$obj->addText(' ');
 		$obj->addText('WARNING: THIS IS A DESTRUCTIVE ACTION!!  BEFORE THE DATABASE IS BUILT, ALL TABLES CURRENTLY IN THE DATABASE ARE REMOVED!');
 		$obj->addText(' ');

@@ -1,3 +1,6 @@
+= VERSION 2.0.1 =
+  * Added "--force" argument to build command
+
 = VERSION 2.0.0 =
   * added support for mysqli; can now select during initialization whether to use PDO or mysqli for connecting to the database
   * added build command; allows entire database structure to be erased and rebuilt from an initial schema and applying migrations
