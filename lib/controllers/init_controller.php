@@ -66,7 +66,7 @@ class MpmInitController extends MpmController
 			}
 		}
 		
-		do 
+		/*do 
 		{
 			echo "\nWhich method would you like to use to connect to\nthe database?  ".MPM_METHOD_PDO."=PDO or ".MPM_METHOD_MYSQLI."=MySQLi";
 			if (isset($db_config))
@@ -84,8 +84,8 @@ class MpmInitController extends MpmController
 			{
 			    $method = $db_config->method;
 			}
-		} while ($method < MPM_METHOD_PDO || $method > MPM_METHOD_MYSQLI || $method == 0);
-
+		} while ($method < MPM_METHOD_PDO || $method > MPM_METHOD_MYSQLI || $method == 0) */
+		$method = 2; //Because php-5 can't build without mysqli
 		echo "\nEnter your MySQL database hostname or IP address [";
 		if (isset($db_config))
 		{
@@ -265,7 +265,7 @@ class MpmInitController extends MpmController
 			{
 				echo "not found.\n";
 				echo "Creating migrations table... ";
-				$sql1 = "CREATE TABLE IF NOT EXISTS `mpm_migrations` ( `id` INT(11) NOT NULL AUTO_INCREMENT, `timestamp` DATETIME NOT NULL, `active` TINYINT(1) NOT NULL DEFAULT 0, `is_current` TINYINT(1) NOT NULL DEFAULT 0, PRIMARY KEY ( `id` ) ) ENGINE=InnoDB";
+				$sql1 = "CREATE TABLE IF NOT EXISTS `mpm_migrations` ( `id` INT(11) NOT NULL AUTO_INCREMENT, `timestamp` DATETIME NOT NULL, `active` TINYINT(1) NOT NULL DEFAULT 0, `is_current` TINYINT(1) NOT NULL DEFAULT 0, `objectstore` mediumtext, PRIMARY KEY ( `id` ) ) ENGINE=InnoDB";
 				$sql2 = "CREATE UNIQUE INDEX `TIMESTAMP_INDEX` ON `mpm_migrations` ( `timestamp` )";
 				
 				if (MpmDbHelper::getMethod() == MPM_METHOD_PDO)

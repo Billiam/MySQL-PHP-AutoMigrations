@@ -223,12 +223,14 @@ class MpmListHelper
 			$full_file = MPM_DB_PATH . $file;
 			if ($file != 'schema.php' && $file != '.' && $file != '..' && !is_dir($full_file) && stripos($full_file, '.php') !== false)
 			{
-                $timestamp = MpmStringHelper::getTimestampFromFilename($file);
-				$obj = (object) array();
-				$obj->timestamp = $timestamp;
-				$obj->filename = $file;
-				$obj->full_file = $full_file;
-				$list[] = $obj;
+				$timestamp = MpmStringHelper::getTimestampFromFilename($file);
+				if($timestamp) {
+					$obj = (object) array();
+					$obj->timestamp = $timestamp;
+					$obj->filename = $file;
+					$obj->full_file = $full_file;
+					$list[] = $obj;
+				}
 			}
 		}
 		return $list;
