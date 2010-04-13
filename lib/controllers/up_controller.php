@@ -1,113 +1,120 @@
 <?php
 /**
- * This file houses the MpmUpController class.
- *
- * @package    mysql_php_migrations
- * @subpackage Controllers
- * @license    http://www.opensource.org/licenses/bsd-license.php  The New BSD License
- * @link       http://code.google.com/p/mysql-php-migrations/
- */
+* This file houses the MpmUpController class.
+*
+* @package    mysql_php_migrations
+* @subpackage Controllers
+* @license    http://www.opensource.org/licenses/bsd-license.php  The New BSD License
+* @link       http://code.google.com/p/mysql-php-migrations/
+*/
 
 /**
- * The MpmUpController is used to migrate up to a new version.
- *
- * @package    mysql_php_migrations
- * @subpackage Controllers
- */
+* The MpmUpController is used to migrate up to a new version.
+*
+* @package    mysql_php_migrations
+* @subpackage Controllers
+*/
 class MpmUpController extends MpmController
 {
-	
+
 	/**
-	 * Determines what action should be performed and takes that action.
-	 *
-	 * @uses MpmUpController::displayHelp()
-	 * @uses MpmCommandLineWriter::getInstance()
-	 * @uses MpmCommandLineWriter::writeHeader()
-	 * @uses MpmCommandLineWriter::writeFooter()
-	 * @uses MpmMigrationHelper::getListOfMigrations()
-	 * @uses MpmMigrationHelper::getTimestampFromId()
-	 * @uses MpmMigrationHelper::runMigration()
-	 * @uses MpmMigrationHelper::setCurrentMigration
-	 * 
-	 * @param bool $quiet supresses certain text when true
-	 *
-	 * @return void
-	 */
+	* Determines what action should be performed and takes that action.
+	*
+	* @uses MpmUpController::displayHelp()
+	* @uses MpmCommandLineWriter::getInstance()
+	* @uses MpmCommandLineWriter::writeHeader()
+	* @uses MpmCommandLineWriter::writeFooter()
+	* @uses MpmMigrationHelper::getListOfMigrations()
+	* @uses MpmMigrationHelper::getTimestampFromId()
+	* @uses MpmMigrationHelper::runMigration()
+	* @uses MpmMigrationHelper::setCurrentMigration
+	* 
+	* @param bool $quiet suppresses certain text when true
+	*
+	* @return void
+	*/
 	public function doAction($quiet = false)
 	{
 		$clw = MpmCommandLineWriter::getInstance();
-		
-		if (!$quiet)
-		{
-		    $clw->writeHeader();
+
+		$skip_headers = false;
+		if(!empty($this->arguments[2])) {
+			$skip_headers = true;
 		}
-		
+
+		if (!$quiet && !$skip_headers)
+		{
+			$clw->writeHeader();
+		}
+
 		if (count($this->arguments) == 0)
 		{
 			return $this->displayHelp();
 		}
-		
+
 		$up_to = $this->arguments[0];
-		
+
 		if (!is_numeric($up_to))
 		{
 			return $this->displayHelp();
 		}
-		
+
+
 		// are we forcing this?
 		$forced = false;
 		if (isset($this->arguments[1]) && strcasecmp($this->arguments[1], '--force') == 0)
 		{
-		    $forced = true;
+			$forced = true;
 		}
 
-        // what migrations need to be done?
-        $list = MpmMigrationHelper::getListOfMigrations($up_to);
-        
+		// what migrations need to be done?
+		$list = MpmMigrationHelper::getListOfMigrations($up_to);
+
 		if (count($list) == 0)
 		{
-		    if (!$quiet)
-		    {
-		        echo 'All needed migrations have already been run or no migrations exist.';
-		        $clw->writeFooter();
-		        exit;
-		    }
-		    else
-		    {
-		        return;
-		    }
+			if (!$quiet)
+			{
+				echo "\nAll needed migrations have already been run or no migrations exist.";
+				if(!$skip_headers) {
+					$clw->writeFooter();
+				}
+				return;
+			}
+			else
+			{
+				return;
+			}
 		}
-		
+
 		$to = MpmMigrationHelper::getTimestampFromId($up_to);
-		
+
 		if (!$quiet)
 		{
-		    echo "Migrating to " . $to . ' (ID '.$up_to.')... ';
+			echo "\nMigrating to " . $to . ' (ID '.$up_to.')... ';
 		}
-		
+
 		foreach ($list as $id => $obj)
 		{
-		    MpmMigrationHelper::runMigration($obj, 'up', $forced);
+			MpmMigrationHelper::runMigration($obj, 'up', $forced);
 		}
-		
+
 		MpmMigrationHelper::setCurrentMigration($up_to);
-		
-		if (!$quiet)
+
+		if (!$quiet && !$skip_headers)
 		{
-		    echo "\n";
-		    $clw->writeFooter();
+			$clw->writeFooter();
 		}
 	}
 
 	/**
-	 * Displays the help page for this controller.
-	 * 
-	 * @uses MpmCommandLineWriter::getInstance()
-	 * @uses MpmCommandLineWriter::addText()
-	 * @uses MpmCommandLineWriter::write()
-	 * 
-	 * @return void
-	 */
+	* Displays the help page for this controller.
+	* 
+	* @uses MpmCommandLineWriter::getInstance()
+	* @uses MpmCommandLineWriter::addText()
+	* @uses MpmCommandLineWriter::write()
+	* 
+	* @return void
+	*/
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
@@ -124,7 +131,7 @@ class MpmUpController extends MpmController
 		$obj->addText('./migrate.php up 12 --force', 4);
 		$obj->write();
 	}
-	
+
 }
 
 ?>

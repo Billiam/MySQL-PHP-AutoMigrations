@@ -35,7 +35,10 @@ class MpmAutoController extends MpmController
 	{
 		  // make sure we're init'd
 		  MpmDbHelper::test();
-		
+			
+			$clw = MpmCommandLineWriter::getInstance();
+			$clw->writeHeader();
+
       // are we forcing this?
       $forced = '';
       if (isset($this->arguments[0]) && strcasecmp($this->arguments[0], '--force') == 0)
@@ -49,8 +52,8 @@ class MpmAutoController extends MpmController
       $current_timestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
       $current_num = MpmMigrationHelper::getCurrentMigrationNumber();
       
-      $latest_num =  MpmMigrationHelper::getLatestMigration();
-      $latest_timestamp = MpmMigrationHelper::getTimestampFromId($latest_num);
+      //$latest_num =  MpmMigrationHelper::getLatestMigration();
+      //$latest_timestamp = MpmMigrationHelper::getTimestampFromId($latest_num);
       
       $db_migrations =  MpmListHelper::getListFromDb($current_timestamp,'down');
 
@@ -64,6 +67,8 @@ class MpmAutoController extends MpmController
           $file_timestamps[]=$timestamp;
         }
       }
+      end($file_timestamps);
+      $latest_timestamp = current($file_timestamps);
       
       //compare timestamps that are in either array to timestamps that are in both arrays to find missing timestamps in either
       //$missing_merges = array_diff(array_unique( array_merge($file_timestamps,$db_migrations) ), array_intersect($file_timestamps,$db_migrations) );
@@ -74,40 +79,42 @@ class MpmAutoController extends MpmController
       sort($missing_merges);
       reset($missing_merges);
       $oldest_missing=current($missing_merges);
-      
-      $clw = MpmCommandLineWriter::getInstance();
-      $clw->writeHeader();
-      
+
       try
       {
-        if($oldest_missing && $oldest_missing<$current_timestamp) {
+        if($oldest_missing && $oldest_missing<=$current_timestamp) {
           $previous_migration = MpmMigrationHelper::getNextTimestamp($oldest_missing,'down');
           if($previous_migration) {
-            $target_down = $previous_migration->id
+            $target_down = $previous_migration->id;
           } else {
             $target_down = -1;
           }
+          $down = new MpmDownController('down', array ( $target_down, $forced, true ));
+        	$down->doAction($quiet);
         }
-        $down = new MpmUpController('down', array ( $target_down, $forced ));
-        $down->doAction($quiet);
-        //possibly handle some deletes here
-        
-        //merge here?
-        
-        $to_id = MpmMigrationHelper::getLatestMigration();
-        $obj = new MpmUpController('up', array ( $to_id, $forced ));
-        $obj->doAction($quiet);
-        
-        
-      }
+        //merge files with database
+				MpmListHelper::mergeFilesWithDb();
+				
+        $newest_id = MpmMigrationHelper::getLatestMigration();
+        if($newest_id) {
+					$newest_timestamp = MpmMigrationHelper::getTimestampFromId($newest_id);
+					$current_timestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
+	       	if($newest_timestamp > $current_timestamp) {
+		        $obj = new MpmUpController('up', array ( $newest_id, $forced, true ));
+		        $obj->doAction($quiet);
+					} else {
+						echo "\nUp to Date";
+					}
+	      } else {
+					echo "\nUp to Date";
+				}
+			}
       catch (Exception $e)
       {
         echo "\n\nERROR: " . $e->getMessage() . "\n\n";
         exit;
       }
-      
-     echo "\n";
-    $clw->writeFooter();
+      $clw->writeFooter();
 		
 	}
 	

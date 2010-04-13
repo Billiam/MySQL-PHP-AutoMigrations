@@ -36,11 +36,16 @@ class MpmLatestController extends MpmController
 		// make sure we're init'd
 		MpmDbHelper::test();
 		
+		$skip_headers = false;
+		if(!empty($this->arguments[1])) {
+			$skip_headers = true;
+		}
+		
 		// are we forcing this?
 		$forced = '';
 		if (isset($this->arguments[0]) && strcasecmp($this->arguments[0], '--force') == 0)
 		{
-		    $forced = '--force';
+			$forced = '--force';
 		}
 		
 		try
@@ -54,8 +59,8 @@ class MpmLatestController extends MpmController
 				exit;
 			}
 			$to_id = MpmMigrationHelper::getLatestMigration();
-			$obj = new MpmUpController('up', array ( $to_id, $forced ));
-    		$obj->doAction($quiet);
+			$obj = new MpmUpController('up', array ( $to_id, $forced, $skip_headers));
+			$obj->doAction($quiet);
 		}
 		catch (Exception $e)
 		{

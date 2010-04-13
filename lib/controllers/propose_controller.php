@@ -43,8 +43,8 @@ class MpmProposeController extends MpmController
       $current_timestamp = MpmMigrationHelper::getCurrentMigrationTimestamp();
       $current_num = MpmMigrationHelper::getCurrentMigrationNumber();
       
-      $latest_num =  MpmMigrationHelper::getLatestMigration();
-      $latest_timestamp = MpmMigrationHelper::getTimestampFromId($latest_num);
+      /*$latest_num =  MpmMigrationHelper::getLatestMigration();
+      $latest_timestamp = MpmMigrationHelper::getTimestampFromId($latest_num);*/
       
       $db_migrations =  MpmListHelper::getListFromDb($current_timestamp,'down');
 
@@ -54,21 +54,24 @@ class MpmProposeController extends MpmController
       $file_timestamps = array();
       
       foreach($all_file_timestamps as $timestamp) {
-        if($timestamp<=$current_timestamp) {
+      	if($timestamp<=$current_timestamp) {
           $file_timestamps[]=$timestamp;
         }
       }
+      
+      end($all_file_timestamps);
+      $latest_timestamp = current($all_file_timestamps);
       
       //compare timestamps that are in either array to timestamps that are in both arrays to find missing timestamps in either
       //$missing_merges = array_diff(array_unique( array_merge($file_timestamps,$db_migrations) ), array_intersect($file_timestamps,$db_migrations) );
       $missing_database = array_diff($file_timestamps,$db_migrations);
       $missing_files = array_diff($db_migrations,$file_timestamps);
       $missing_merges = array_merge($missing_files,$missing_database);
-            
+
       sort($missing_merges);
       reset($missing_merges);
       $oldest_missing=current($missing_merges);
-      
+
       $clw = MpmCommandLineWriter::getInstance();
       $clw->writeHeader();
       if(!$current_num) {
@@ -85,33 +88,33 @@ class MpmProposeController extends MpmController
       }
      
       if(!empty($missing_database)) {
-        echo "\n\nOld migrations that have not been run\n----------\n";
+        echo "\n\nOld migrations that have not been run\n----------";
         foreach($missing_database as $db) {
-          echo " $db\n";
+          echo "\n $db";
         }
       }
-      
-      
-      if($current_timestamp<$latest_timestamp) {
-        echo "\nLatest migration is: $latest_num -- $latest_timestamp.";
-      }
-      
-      if(($oldest_missing && $oldest_missing<$current_timestamp) || $current_timestamp<$latest_timestamp) {
-        echo "\n\n--- Migration Path --------------------------\n";
 
+      if($current_timestamp<$latest_timestamp) {
+        echo "\nLatest migration is: $latest_timestamp.";
+      }
+
+      if(($oldest_missing && $oldest_missing<=$current_timestamp) || $current_timestamp<$latest_timestamp) {
+        echo "\n\n--- Migration Path --------------------------\n";
+				$post_down_timestamp = $current_timestamp;
         if($oldest_missing && $oldest_missing<=$current_timestamp) {
           //find target down timestamp
           $previous_migration = MpmMigrationHelper::getNextTimestamp($oldest_missing,'down');
-
           if($previous_migration) {
-            echo "  Migrate down to $previous_migration->id -- $previous_migration->timestamp\n";
+          	$post_down_timestamp =  $previous_migration->timestamp;
+            echo "\n  Migrate down to: $previous_migration->id -- $previous_migration->timestamp";
           } else {
-            echo "  Remove all migrations\n";
+          	$post_down_timestamp = 0;
+            echo "\n  Remove all migrations";
           }
         }
         
-        if($current_timestamp<$latest_timestamp) {
-          echo "  Update to latest: $latest_num -- $latest_timestamp";
+        if($post_down_timestamp<$latest_timestamp) {
+          echo "\n  Migrate up to latest: $latest_timestamp";
         }
       } else {
         echo "\n\n  You are up to date";
@@ -128,8 +131,7 @@ class MpmProposeController extends MpmController
 			$obj = new MpmUpController('up', array ( $to_id, $forced ));
     		$obj->doAction($quiet);
         */
-     echo "\n";
-    $clw->writeFooter();
+			$clw->writeFooter();
 		
 	}
 	

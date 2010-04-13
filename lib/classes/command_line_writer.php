@@ -135,7 +135,7 @@ class MpmCommandLineWriter
 	{
 		$this->addText(' ');
 		$max_line_len = $this->maxWidth - 1;
-		$bar = '';
+		$bar = "\n";
 		for ($i = 0; $i < $max_line_len; $i++)
 		{
 			$bar .= "*";

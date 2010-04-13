@@ -31,11 +31,16 @@ class MpmDownController extends MpmController
 	 * 
 	 * @return void
 	 */
-	public function doAction()
+	public function doAction($quiet = false)
 	{
 	    // write the header
 		$clw = MpmCommandLineWriter::getInstance();
-		$clw->writeHeader();
+		$skip_headers = false;
+		if(!empty($this->arguments[2])) {
+			$skip_headers = true;
+		}
+		
+		if(!$quiet && !$skip_headers)$clw->writeHeader();
 		
 		// correct number of command line arguments?
 		if (count($this->arguments) == 0)
@@ -63,17 +68,18 @@ class MpmDownController extends MpmController
 		
 		// get list of migrations and the current migration number
 		$list = MpmMigrationHelper::getListOfMigrations($down_to, 'down');
+		
 		$total = count($list);
 		$current = MpmMigrationHelper::getCurrentMigrationNumber();
 
 		if ($down_to == '-1')
 		{
-			echo "Removing all migrations... ";
+			if(!$quiet)echo "Removing all migrations... ";
 			$down_to = 0;
 		}
 		else
 		{
-			echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . ' (ID '.$down_to.')... ';
+			if(!$quiet)echo "Migrating to " . MpmMigrationHelper::getTimestampFromId($down_to) . ' (ID '.$down_to.')... ';
 		}
 		
 		foreach ($list as $id => $obj)
@@ -82,8 +88,10 @@ class MpmDownController extends MpmController
 		}
 		
 		MpmMigrationHelper::setCurrentMigration($down_to);
-		echo "\n";
-		$clw->writeFooter();
+		if(!$skip_headers && !$quiet) {
+			echo "\n";
+			$clw->writeFooter();
+		}
 	}
 
 	/**

@@ -69,6 +69,7 @@ class MpmMigrationHelper
 		$file_timestamp = MpmStringHelper::getFilenameFromTimestamp($obj->timestamp);
 		if($method == 'up') {
 			$classname = 'Migration_' . $file_timestamp;
+			
 			// make sure the file exists; if it doesn't, skip it but display a message
 			$files = glob(MPM_DB_PATH.$file_timestamp.'*.php');
 			if(empty($files)) {
@@ -93,6 +94,7 @@ class MpmMigrationHelper
 			//unserialize
 			eval('?>'.$obj->objectstore.'<?');
 			$down_migration = 'Migration_objectstore_'.$file_timestamp;
+
 			$migration = new $down_migration();
 			if(!$migration) {
 				echo "failed!";
@@ -112,7 +114,7 @@ class MpmMigrationHelper
 			echo "\n\tPerforming " . strtoupper($method) . " migration " . $obj->timestamp . ' (ID '.$obj->id.')... ';
 		}
 
-
+		
 		if ($migration instanceof MpmMigration) // need PDO object
 		{
 			$dbObj = MpmDbHelper::getPdoObj();
@@ -145,7 +147,6 @@ class MpmMigrationHelper
 				//Old and new items may need to take same ID space in DB
 				$sql = "DELETE FROM `mpm_migrations` WHERE `id` = {$obj->id}";
 			}
-
 			$dbObj->exec($sql);
 
 		}
@@ -526,12 +527,14 @@ class MpmMigrationHelper
 					$pdo = MpmDbHelper::getDbObj();
 					$stmt = $pdo->query($sql);
 					$result = $stmt->fetch(PDO::FETCH_OBJ);
+					if(!$result)return false;
 					$to_id = $result->id;
 					break;
 				case MPM_METHOD_MYSQLI:
 					$mysqli = MpmDbHelper::getDbObj();
 					$stmt = $mysqli->query($sql);
 					$result = $stmt->fetch_object();
+					if(!$result)return false;
 					$to_id = $result->id;
 					break;
 			}
@@ -564,12 +567,14 @@ class MpmMigrationHelper
 					$pdo = MpmDbHelper::getDbObj();
 					$stmt = $pdo->query($sql);
 					$result = $stmt->fetch(PDO::FETCH_OBJ);
+					if(!$result)return false;
 					$to_id = $result->id;
 					break;
 				case MPM_METHOD_MYSQLI:
 					$mysqli = MpmDbHelper::getDbObj();
 					$stmt = $mysqli->query($sql);
 					$result = $stmt->fetch_object();
+					if(!$result)return false;
 					$to_id = $result->id;
 					break;
 			}

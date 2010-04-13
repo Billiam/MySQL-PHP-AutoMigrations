@@ -69,11 +69,11 @@ class MpmAddController extends MpmController
 			$file .= "{\n\n";
 			$file .= "\t" . 'public function up(PDO &$pdo)' . "\n";
 			$file .= "\t{\n";
-			$file .= "\t\t".'$pdo->exec("");' ."\n";
+			$file .= "\t\t".'$pdo->exec("DO 0");' ."\n";
 			$file .= "\t}\n\n";
 			$file .= "\t" . 'public function down(PDO &$pdo)' . "\n";
 			$file .= "\t{\n";
-			$file .= "\t\t".'$pdo->exec("");' ."\n";
+			$file .= "\t\t".'$pdo->exec("DO 0");' ."\n";
 			$file .= "\t}\n\n";
 			$file .= "}\n\n";
 			$file .= "?>";
@@ -85,11 +85,11 @@ class MpmAddController extends MpmController
 			$file .= "{\n\n";
 			$file .= "\t" . 'public function up(ExceptionalMysqli &$mysqli)' . "\n";
 			$file .= "\t{\n";
-			$file .= "\t\t".'$mysqli->exec("");' ."\n";
+			$file .= "\t\t".'$mysqli->exec("DO 0");' ."\n";
 			$file .= "\t}\n\n";
 			$file .= "\t" . 'public function down(ExceptionalMysqli &$mysqli)' . "\n";
 			$file .= "\t{\n";
-			$file .= "\t\t".'$mysqli->exec("");' ."\n";
+			$file .= "\t\t".'$mysqli->exec("DO 0");' ."\n";
 			$file .= "\t}\n\n";
 			$file .= "}\n\n";
 			$file .= "?>";
