@@ -130,12 +130,15 @@ class MpmAddController extends MpmController
 	public function displayHelp()
 	{
 		$obj = MpmCommandLineWriter::getInstance();
-		$obj->addText('./migrate.php add');
+		$obj->addText('./migrate.php add [additional_file_name_notes]');
 		$obj->addText(' ');
 		$obj->addText('This command is used to create a new migration script.  The script will be created and prepopulated with the up() and down() methods which you can then modify for the migration.');
 		$obj->addText(' ');
+		$obj->addText('You may optionally include a word or phrase that will be added to the end of the filename when it\'s created.');		
+		$obj->addText(' ');
 		$obj->addText('Valid Example:');
 		$obj->addText('./migrate.php add', 4);
+		$obj->addText('./migrate.php add create_fulltext_indices', 4);
 		$obj->write();
 	}
 
