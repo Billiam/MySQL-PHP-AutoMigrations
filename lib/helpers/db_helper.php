@@ -250,6 +250,10 @@ class MpmDbHelper
             {
                 $problems[] = 'Migrations table not found in your database.  Re-run the init command.';
             }
+            if (!is_dir(MPM_DB_PATH)) {
+              $problems[] = 'Migration directory ( '.MPM_DB_PATH.' ) does not exist';
+            }
+            
             if (count($problems) > 0)
             {
                 $obj = MpmCommandLineWriter::getInstance();
