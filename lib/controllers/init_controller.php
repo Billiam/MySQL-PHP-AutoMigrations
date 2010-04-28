@@ -46,12 +46,14 @@ class MpmInitController extends MpmController
 		$clw->writeHeader();
 		echo "Defaults are in brackets ([]).  To accept the default, simply press ENTER.\n\n";
 		
+		$STDIN = fopen('php://stdin', 'r');
+		
 		if (file_exists(MPM_PATH . '/config/db_config.php'))
 		{
 			echo "\nWARNING:  IF YOU CONTINUE, YOUR EXISTING MIGRATION SETUP WILL BE ERASED!";
 			echo "\nThis will not affect your existing migrations or database, but \ncould cause your future migrations to fail.";
 			echo "\nDO YOU WANT TO CONTINUE? [y/N] ";
-			$answer = fgets(STDIN);
+			$answer = fgets($STDIN);
 			$answer = trim($answer);
 			$answer = strtolower($answer);
 			if (empty($answer) || substr($answer, 0, 1) == 'n')
@@ -74,7 +76,7 @@ class MpmInitController extends MpmController
 			    echo " [" . $db_config->method . "]";
 			}
 			echo ": ";
-			$method = fgets(STDIN);
+			$method = fgets($STDIN);
 			$method = trim($method);
 			if (!is_numeric($method))
 			{
@@ -96,7 +98,7 @@ class MpmInitController extends MpmController
 		    echo 'localhost';
 		}
 		echo ']: ';
-		$host = fgets(STDIN);
+		$host = fgets($STDIN);
 		$host = trim($host);
 		if (empty($host))
 		{
@@ -123,7 +125,7 @@ class MpmInitController extends MpmController
 		    }
 		    echo ']: ';
 			
-			$port = fgets(STDIN);
+			$port = fgets($STDIN);
 			$port = trim($port);
 			if (empty($port))
 			{
@@ -143,7 +145,7 @@ class MpmInitController extends MpmController
 		        echo ' [', $db_config->user, ']';
 		    }
 		    echo ': ';
-			$user = fgets(STDIN);
+			$user = fgets($STDIN);
 			$user = trim($user);
 			if (empty($user) && isset($db_config))
 			{
@@ -157,7 +159,7 @@ class MpmInitController extends MpmController
 		    echo $db_config->pass;
 		}
 		echo ']: ';
-		$pass = fgets(STDIN);
+		$pass = fgets($STDIN);
 		$pass = trim($pass);
 		if (empty($pass) && isset($db_config))
 		{
@@ -177,7 +179,7 @@ class MpmInitController extends MpmController
 			    echo ' [', $db_config->name, ']';
 			}
 			echo ': ';
-			$dbname = fgets(STDIN);
+			$dbname = fgets($STDIN);
 			$dbname = trim($dbname);
 			if (empty($dbname) && isset($db_config))
 			{
@@ -195,7 +197,7 @@ class MpmInitController extends MpmController
     	    echo MPM_PATH . '/db/';
     	}
     	echo ']: ';
-		$db_path = fgets(STDIN);
+		$db_path = fgets($STDIN);
 		$db_path = trim($db_path);
 		if (empty($db_path) && isset($db_config))
 		{
@@ -215,7 +217,7 @@ class MpmInitController extends MpmController
 		if (file_exists($db_path . 'schema.php'))
 		{
 		    echo "\nPerform build of database after initialization (builds schema\nand runs all existing migrations) [y/N]: ";
-		    $do_build = fgets(STDIN);
+		    $do_build = fgets($STDIN);
 		    $do_build = trim($do_build);
 		    $doBuild = false;
             if (strcasecmp(substr($do_build, 0, 1), 'y') == 0)
