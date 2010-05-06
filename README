@@ -1,0 +1,79 @@
+MySQL-PHP-AutoMigrations is a fork of mysql-php-migrations
+( http://code.google.com/p/mysql-php-migrations/ )
+
+The original project has been altered primarily to help keep
+database schema in sync between branches during development.
+
+When run, the actual content of a migration is now stored in the
+database. This means that when migrating downwards, the contents
+of the migrations directory are not important.
+
+==NEW ARGUMENTS==
++------------------------+
+| Auto, most importantly |
++------------------------+
+Auto is designed to be used when the migrations directory changes,
+such as after a branch checkout. There may be new migrations, and
+ some completed migrations may be absent.
+
+Auto will compare migrations that have been run to the available
+patches in the migrations directory, migrate down to the oldest
+shared migration (using the database of stored migrations, not the
+files in the directory), and then migrate back up to the newest
+migration in the directory.
+
+--- Example: ---
+Suppose the following migrations have already been run in your
+current branch (branch-b) :
+2010_01_01_02_49_23_add_table_indices.php
+2010_02_13_01_11_57_delete_payments_table.php
+2010_04_13_13_21_36_insert_new_payment_types.php
+
+You then switch to another branch (branch-a) that's has an earlier
+base. This branch has the following patches:
+2010_01_01_02_49_23_add_table_indices.php
+2010_05_12_14_23_08_video_table_simplification.php
+
+This branch contains some code that's still looking for the payments
+table, causing query errors. Your database schema is no longer in
+sync.
+
+Without automigrations, you might need to:
+1. check out branch-a
+2. note that the oldest shared patch between branch-a and branch-b 
+   isadd_table_indices
+3. check out branch-b again
+4. migrate down to this shared patch
+5. check out branch-a
+6. migrate up to newest patch (video_table_simplification)
+
+With automigrations
+1. check out branch-a
+2. run auto function
+
+Switching back to branch-b is easy, too
+1. check out branch-b
+2. run auto function
+
+This is very useful for development, but a production server will
+probably not affect a production server, which will just run
+migrate.php latest.
+
++---------+
+| Propose |
++---------+
+Simply prints the actions that auto would take if it were run.
+
+
+
+==OTHER SIGNIFICANT CHANGES==
+Text strings after timestamps in migration filenames are allowed.
+2010_05_12_14_23_08_video_table_simplification.php
+instead of 
+2010_05_12_14_23_08.php
+
+Again, this is to ease branching in multi-developer environments.
+
+
+Improved schema creation from this suggestion: 
+http://code.google.com/p/mysql-php-migrations/issues/detail?id=4
