@@ -29,7 +29,7 @@ current branch (branch-b) :
 2010_02_13_01_11_57_delete_payments_table.php
 2010_04_13_13_21_36_insert_new_payment_types.php
 
-You then switch to another branch (branch-a) that's has an earlier
+You then switch to another branch (branch-a) that has an earlier
 base. This branch has the following patches:
 2010_01_01_02_49_23_add_table_indices.php
 2010_05_12_14_23_08_video_table_simplification.php
@@ -41,9 +41,9 @@ sync.
 Without automigrations, you might need to:
 1. check out branch-a
 2. note that the oldest shared patch between branch-a and branch-b 
-   isadd_table_indices
+   is: add_table_indices
 3. check out branch-b again
-4. migrate down to this shared patch
+4. migrate down to this shared patch (add_table_indices)
 5. check out branch-a
 6. migrate up to newest patch (video_table_simplification)
 
