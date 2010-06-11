@@ -31,7 +31,7 @@ class ExceptionalMysqli extends mysqli
     public function __construct()
     {
         $args = func_get_args();
-        eval("parent::__construct(" . join(',', array_map('MpmStringHelper::addSingleQuotes', $args)) . ");");
+        eval("parent::__construct(" . join(',', array_map(array('MpmStringHelper','addSingleQuotes'), $args)) . ");");
         if ($this->connect_errno)
         {
             throw new MpmDatabaseConnectionException($this->connect_error);
