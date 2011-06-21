@@ -65,7 +65,7 @@ class MpmLatestController extends MpmController
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 	}
 	
