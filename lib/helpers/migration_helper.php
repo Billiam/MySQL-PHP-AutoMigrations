@@ -42,7 +42,7 @@ class MpmMigrationHelper
 			$obj->rollback();
 			echo "\n\tQuery failed!";
 			echo "\n\t--- " . $e->getMessage();
-			exit;
+			exit(1);
 		}
 		$obj->commit();
 	}
@@ -79,7 +79,7 @@ class MpmMigrationHelper
 
 			if(count($files)>1) {
 				echo "\n\tError: Duplicate migration timestamp found! " . $obj->timestamp . ' (ID '.$obj->id.')' ;
-				exit;
+				exit(1);
 			}
 			$filename = $files[0];
 
@@ -104,7 +104,7 @@ class MpmMigrationHelper
 				if (!$forced)
 				{
 					echo "\n\n";
-					exit;
+					exit(1);
 				}
 				else
 				{
@@ -160,7 +160,7 @@ class MpmMigrationHelper
 			if (!$forced)
 			{
 				echo "\n\n";
-				exit;
+				exit(1);
 			}
 			else
 			{
@@ -254,7 +254,7 @@ class MpmMigrationHelper
 			catch (Exception $e)
 			{
 				echo "\n\nError: " . $e->getMessage() . "\n\n";
-				exit;
+				exit(1);
 			}
 			break;
 			case MPM_METHOD_MYSQLI:
@@ -266,7 +266,7 @@ class MpmMigrationHelper
 			catch (Exception $e)
 			{
 				echo "\n\nError: " . $e->getMessage() . "\n\n";
-				exit;
+				exit(1);
 			}
 			break;
 
@@ -315,7 +315,7 @@ class MpmMigrationHelper
 			catch (Exception $e)
 			{
 				echo "\n\nError: " . $e->getMessage() . "\n\n";
-				exit;
+				exit(1);
 			}
 			break;
 			case MPM_METHOD_MYSQLI:
@@ -331,7 +331,7 @@ class MpmMigrationHelper
 			catch (Exception $e)
 			{
 				echo "\n\nError: " . $e->getMessage() . "\n\n";
-				exit;
+				exit(1);
 			}
 			break;
 
@@ -402,7 +402,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $timestamp;
 	}
@@ -461,7 +461,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $latest;
 	}
@@ -501,7 +501,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $count;
 	}
@@ -542,7 +542,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $to_id;
 	}
@@ -582,7 +582,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $to_id;
 	}
@@ -629,7 +629,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $return;
 	}
@@ -669,7 +669,7 @@ class MpmMigrationHelper
 		catch (Exception $e)
 		{
 			echo "\n\nERROR: " . $e->getMessage() . "\n\n";
-			exit;
+			exit(1);
 		}
 		return $obj;
 	}
